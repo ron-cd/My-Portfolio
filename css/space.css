@@ -1,0 +1,413 @@
+/* =============================================================================
+  space.css — Space Background: Globe, Satellite, Particles, Nebula, Stars
+  Author : Aaron Dela Cruz
+  Updated: 2025
+   ============================================================================= */
+
+/* ─── Fixed background gradient ──────────────────────────────────────────── */
+.bg-gradient {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(30,50,100,.5) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 70%,  rgba(20,40,80,.3)  0%, transparent 60%),
+    var(--clr-bg);
+}
+
+/* ─── Space layer wrapper ─────────────────────────────────────────────────── */
+.space-layer {
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; overflow: hidden;
+}
+
+/* Canvas layers */
+#particle-canvas,
+#globe-trail {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+
+/* ─── Nebula glows ────────────────────────────────────────────────────────── */
+.nebula {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px);
+  animation: nebulaPulse 12s ease-in-out infinite alternate;
+}
+.nebula-1 {
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(77,90,167,.15)  0%, transparent 70%);
+  top: -100px; right: -100px;
+}
+.nebula-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(0,180,140,.08)  0%, transparent 70%);
+  bottom: 20%; left: -150px; animation-delay: -4s;
+}
+.nebula-3 {
+  width: 400px; height: 300px;
+  background: radial-gradient(ellipse, rgba(150,50,200,.10) 0%, transparent 70%);
+  top: 40%; right: 10%; animation-delay: -8s;
+}
+@keyframes nebulaPulse {
+  0%   { transform: scale(1)   rotate(0deg); opacity: .6; }
+  100% { transform: scale(1.2) rotate(5deg); opacity: 1;  }
+}
+
+/* ─── Shooting stars ──────────────────────────────────────────────────────── */
+.shooting-star {
+  position: fixed; width: 2px; height: 2px;
+  background: #fff; border-radius: 50%; box-shadow: 0 0 4px #fff;
+  pointer-events: none; z-index: -1;
+  animation: shootingStar 5s linear infinite; opacity: 0;
+}
+.shooting-star:nth-child(1) { top: 12%; left: 15%; animation-delay: 0s;   animation-duration: 3.5s; }
+.shooting-star:nth-child(2) { top: 30%; left: 65%; animation-delay: 2.5s; animation-duration: 4s;   }
+.shooting-star:nth-child(3) { top: 8%;  left: 80%; animation-delay: 6s;   animation-duration: 3s;   }
+.shooting-star::after {
+  content: ''; position: absolute; top: 50%; right: 0;
+  width: 80px; height: 1px; transform: translateY(-50%);
+  background: linear-gradient(to right, transparent, #fff);
+}
+@keyframes shootingStar {
+  0%  { opacity: 0; transform: translate(0,0); }
+  5%  { opacity: 1; }
+  100%{ opacity: 0; transform: translate(220px, 110px); }
+}
+
+/* ─── Realistic Earth Globe ───────────────────────────────────────────────── */
+/* Fixed bottom-right, purely decorative — JS never moves it */
+#space-globe {
+  position: fixed;
+  bottom: -28vw; right: -16vw;
+  width: 88vw;   height: 88vw;
+  max-width: 920px; max-height: 920px;
+  z-index: -1; pointer-events: none;
+  transform: none !important;       /* prevent any JS interference */
+  opacity: 0;
+  animation: globeFadeIn 2s ease 0.9s forwards;
+}
+@keyframes globeFadeIn { from { opacity: 0; } to { opacity: .92; } }
+
+/* Sphere body — layered gradients simulate continents, oceans, polar ice */
+.globe-body {
+  width: 100%; height: 100%; border-radius: 50%;
+  position: relative; overflow: hidden;
+  background:
+    /* Atmosphere highlight */
+    radial-gradient(circle at 32% 28%,  rgba(180,220,255,.20) 0%, transparent 38%),
+    /* Polar ice caps */
+    radial-gradient(ellipse 80% 12% at 50%  4%,  rgba(225,238,255,.55) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 10% at 50% 97%,  rgba(215,230,255,.45) 0%, transparent 55%),
+    /* Coastal shallows */
+    radial-gradient(ellipse 10%  8% at 46% 52%, rgba(0,165,145,.35) 0%, transparent 70%),
+    radial-gradient(ellipse  8%  6% at 20% 60%, rgba(0,155,135,.30) 0%, transparent 65%),
+    /* Asia */
+    radial-gradient(ellipse 34% 28% at 74% 36%, rgba(148,115,60,.75) 0%, rgba(115,90,48,.52) 40%, transparent 70%),
+    /* Europe */
+    radial-gradient(ellipse 10% 12% at 52% 26%, rgba(135,105,58,.68) 0%, transparent 60%),
+    /* Africa */
+    radial-gradient(ellipse 14% 22% at 50% 54%, rgba(178,135,68,.78) 0%, rgba(145,108,52,.52) 45%, transparent 68%),
+    /* North America */
+    radial-gradient(ellipse 18% 24% at 22% 35%, rgba(125,98,52,.70)  0%, rgba(98,78,44,.52)  40%, transparent 65%),
+    /* South America */
+    radial-gradient(ellipse 10% 18% at 26% 62%, rgba(58,128,52,.72)  0%, rgba(38,108,44,.52) 40%, transparent 65%),
+    /* Australia */
+    radial-gradient(ellipse 10%  8% at 76% 68%, rgba(185,148,78,.70) 0%, transparent 60%),
+    /* Ocean */
+    radial-gradient(ellipse 40% 60% at 38% 55%, rgba(10,58,118,.62)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 50%, rgba(8,48,108,.58)   0%, transparent 70%),
+    /* Ocean base */
+    radial-gradient(circle at 50% 50%, #0d3464 0%, #071e3e 42%, #030c1c 100%);
+  box-shadow:
+    0 0 160px rgba(80,160,255,.18),
+    0 0 320px rgba(40,100,200,.09),
+    inset -120px -60px 180px rgba(0,0,0,.84),
+    inset  60px  40px 100px rgba(100,180,255,.08);
+  animation: earthSpin 90s linear infinite;
+}
+
+/* Cloud layer — drifts at a different speed */
+.globe-body::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(ellipse 90% 14% at 50% 48%, rgba(255,255,255,.14) 0%, transparent 65%),
+    radial-gradient(ellipse 40%  8% at 30% 24%, rgba(255,255,255,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 30%  7% at 72% 30%, rgba(255,255,255,.09) 0%, transparent 50%),
+    radial-gradient(ellipse 45%  7% at 60% 72%, rgba(255,255,255,.08) 0%, transparent 52%),
+    radial-gradient(ellipse 25%  6% at 18% 68%, rgba(255,255,255,.07) 0%, transparent 50%);
+  mix-blend-mode: screen;
+  animation: cloudDrift 55s linear infinite;
+}
+
+/* Specular highlight + dark side */
+.globe-body::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(200,230,255,.10) 0%, transparent 35%);
+  box-shadow: inset 0 0 80px rgba(0,18,55,.60);
+}
+
+/* Atmosphere glow ring */
+.globe-atmosphere {
+  position: absolute; inset: -6%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%,
+    transparent 52%, rgba(60,130,255,.04) 68%,
+    rgba(80,160,255,.10) 80%, rgba(100,180,255,.18) 90%,
+    rgba(120,200,255,.08) 100%);
+  animation: atmospherePulse 10s ease-in-out infinite alternate;
+}
+
+/* Lat/lon grid lines */
+.globe-grid {
+  position: absolute; inset: -1%; border-radius: 50%;
+  pointer-events: none; border: 1px solid rgba(100,180,255,.04);
+}
+.globe-grid::before {
+  content: ''; position: absolute; top: 32%; left: 0; right: 0;
+  height: 1px; background: rgba(100,180,255,.05);
+}
+.globe-grid::after {
+  content: ''; position: absolute; top: 64%; left: 0; right: 0;
+  height: 1px; background: rgba(100,180,255,.04);
+}
+
+/* Orbital ring */
+.globe-ring {
+  position: absolute; top: 50%; left: 50%;
+  width: 112%; height: 112%;
+  transform: translate(-50%,-50%) rotateX(74deg);
+  border-radius: 50%;
+  border: 1.5px solid rgba(100,180,255,.10);
+  box-shadow: 0 0 18px rgba(100,180,255,.07);
+  pointer-events: none;
+}
+
+@keyframes earthSpin  { from { filter: hue-rotate(0deg)   brightness(1);    } to { filter: hue-rotate(6deg)   brightness(1.03); } }
+@keyframes cloudDrift { from { transform: rotate(0deg);   } to { transform: rotate(360deg); } }
+@keyframes atmospherePulse { 0% { opacity: .75; } 100% { opacity: 1; } }
+
+@media (max-width: 768px) {
+  #space-globe {
+    width: 140vw; height: 140vw;
+    bottom: -55vw; right: -45vw;
+    max-width: none; max-height: none;
+  }
+}
+
+/* ─── ISS-style Satellite ─────────────────────────────────────────────────── */
+/*
+  Container: 280 × 120 px
+  Structure (left → right):
+    [solar-array-left] [truss] [module-cluster] [truss] [solar-array-right]
+  JS positions it via transform: translate(); z-index:1 sits above section
+  backgrounds but below all text/card content (which is at z-index:2).
+*/
+#space-satellite {
+  position: fixed; top: 0; left: 0;
+  width: 480px; height: 206px;
+  z-index: 1; pointer-events: none; will-change: transform;
+  filter: drop-shadow(0 0 12px rgba(100,180,255,.35));
+}
+
+.satellite-body {
+  width: 100%; height: 100%;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Horizontal truss spine ── */
+.sat-truss {
+  position: absolute; width: 260px; height: 6px;
+  top: 50%; transform: translateY(-50%);
+  background: linear-gradient(90deg,
+    #6a7a8a 0%, #9ab0c0 20%, #c8d8e8 50%, #9ab0c0 80%, #6a7a8a 100%);
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.6), 0 -1px 2px rgba(200,230,255,.2);
+}
+.sat-truss::before {
+  content: ''; position: absolute; inset: 0; border-radius: 3px;
+  background: repeating-linear-gradient(90deg,
+    transparent 0, transparent 18px,
+    rgba(255,255,255,.12) 18px, rgba(255,255,255,.12) 20px);
+}
+
+/* ── Module cluster ── */
+.sat-modules {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  display: flex; align-items: center; gap: 0; z-index: 2;
+}
+
+/* Main pressurised cylinder */
+.sat-mod-main {
+  width: 48px; height: 28px;
+  background: linear-gradient(180deg,
+    #e8eef8 0%, #c0ccd8 15%, #a8b8cc 40%, #90a0b4 70%, #788898 100%);
+  border-radius: 14px; flex-shrink: 0;
+  border: 1px solid rgba(180,210,240,.4);
+  box-shadow:
+    inset 0 3px 6px rgba(255,255,255,.4),
+    inset 0 -3px 6px rgba(0,0,0,.5),
+    2px 0 4px rgba(0,0,0,.4);
+  position: relative;
+}
+.sat-mod-main::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(150,180,210,.6);
+  box-shadow: inset 0 0 4px rgba(0,0,0,.4);
+}
+.sat-mod-main::after {
+  content: ''; position: absolute;
+  top: 50%; right: -5px; transform: translateY(-50%);
+  width: 5px; height: 10px;
+  background: linear-gradient(90deg, #8898a8, #b0c0d0);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Secondary cylinder */
+.sat-mod-b {
+  width: 30px; height: 22px;
+  background: linear-gradient(180deg,
+    #d0dae8 0%, #a8b8cc 30%, #8898ac 70%, #708090 100%);
+  border-radius: 11px; flex-shrink: 0;
+  border: 1px solid rgba(160,200,230,.35);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.35),
+    inset 0 -2px 4px rgba(0,0,0,.45);
+  position: relative;
+}
+.sat-mod-b::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid rgba(140,170,200,.5);
+}
+
+/* Propulsion end module */
+.sat-mod-c {
+  width: 22px; height: 18px;
+  background: linear-gradient(180deg, #b8c8d8 0%, #8898a8 40%, #687888 100%);
+  border-radius: 9px 4px 4px 9px; flex-shrink: 0;
+  border: 1px solid rgba(140,180,210,.3);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,.25), inset 0 -2px 4px rgba(0,0,0,.4);
+  position: relative;
+}
+.sat-mod-c::after {
+  content: ''; position: absolute;
+  top: 50%; right: -4px; transform: translateY(-50%);
+  width: 4px; height: 8px;
+  background: linear-gradient(90deg, #556070, #445060);
+  border-radius: 0 2px 2px 0;
+  box-shadow: inset 0 0 3px rgba(0,0,0,.6);
+}
+
+/* Gold thermal foil module */
+.sat-mod-foil {
+  width: 18px; height: 26px; flex-shrink: 0; margin: 0 2px;
+  background: repeating-linear-gradient(180deg,
+    #c88820 0, #e8a830 3px, #b87018 3px, #c88820 6px);
+  border-radius: 5px;
+  border: 1px solid rgba(220,160,40,.5);
+  box-shadow:
+    inset  2px 0 4px rgba(255,200,80,.3),
+    inset -2px 0 4px rgba(0,0,0,.5),
+    0 0 8px rgba(200,130,20,.3);
+}
+
+/* Radiator panel */
+.sat-radiator {
+  position: absolute; width: 36px; height: 12px;
+  top: calc(50% - 28px); left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, #e0e8f0 0%, #c0ccd8 50%, #e0e8f0 100%);
+  border: 1px solid rgba(180,210,230,.4); border-radius: 2px;
+  box-shadow: 0 -2px 6px rgba(255,255,255,.15);
+}
+
+/* ── Vertical booms ── */
+.sat-boom {
+  position: absolute; width: 3px; height: 80px;
+  top: calc(50% - 52px);
+  background: linear-gradient(180deg, #8898a8, #6a7a8a);
+  border-radius: 2px;
+}
+.sat-boom-left  { left: 60px;  }
+.sat-boom-right { right: 60px; }
+
+/* ── Solar panels ── */
+.sat-solar {
+  position: absolute; height: 52px;
+  background:
+    linear-gradient(175deg, #0a1428 0%, #102448 40%, #081020 100%),
+    repeating-linear-gradient(90deg,
+      rgba(30,80,180,.25) 0, rgba(30,80,180,.25) 1px, transparent 1px, transparent 12px),
+    repeating-linear-gradient(0deg,
+      rgba(30,80,180,.18) 0, rgba(30,80,180,.18) 1px, transparent 1px, transparent 12px);
+  background-blend-mode: normal, screen, screen;
+  border: 1px solid rgba(40,80,160,.5);
+  border-radius: 3px;
+  box-shadow:
+    0 0 10px rgba(20,60,180,.4),
+    inset 0 0 6px rgba(40,100,220,.15),
+    0 1px 0 rgba(80,140,255,.2);
+}
+.sat-solar::before {
+  content: ''; position: absolute; inset: 0; border-radius: 3px;
+  border: 1px solid rgba(100,160,240,.2);
+  background: linear-gradient(90deg,
+    rgba(180,210,255,.08) 0, transparent 8%, transparent 92%, rgba(180,210,255,.08) 100%);
+}
+.sat-solar::after {
+  content: ''; position: absolute;
+  top: 0; left: 10%; width: 30%; height: 100%;
+  background: linear-gradient(180deg,
+    rgba(100,160,255,.07) 0, transparent 50%, rgba(100,160,255,.04) 100%);
+  border-radius: 3px;
+}
+.sat-solar-l1 { width: 55px; top: 50%; transform: translateY(calc(-50% - 28px)); left:  8px; }
+.sat-solar-l2 { width: 55px; top: 50%; transform: translateY(calc(-50% + 4px));  left:  8px; }
+.sat-solar-r1 { width: 55px; top: 50%; transform: translateY(calc(-50% - 28px)); right: 8px; }
+.sat-solar-r2 { width: 55px; top: 50%; transform: translateY(calc(-50% + 4px));  right: 8px; }
+
+/* ── Communication dish ── */
+.sat-dish {
+  position: absolute;
+  bottom: calc(50% + 14px); left: 50%;
+  transform: translateX(-30%); z-index: 3;
+}
+.sat-dish::before {
+  content: ''; display: block;
+  width: 20px; height: 12px;
+  background: linear-gradient(160deg, #c0d0e0 0%, #8898a8 60%, #607080 100%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  border: 1px solid rgba(160,200,230,.5);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.4), 0 0 6px rgba(100,180,255,.3);
+}
+.sat-dish::after {
+  content: ''; display: block;
+  width: 2px; height: 8px;
+  background: rgba(180,210,240,.7); margin: 0 auto;
+}
+
+/* ── Blinking signal LED ── */
+.sat-signal {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--clr-accent);
+  box-shadow: 0 0 8px var(--clr-accent), 0 0 16px rgba(77,166,255,.6);
+  top: calc(50% - 18px); left: calc(50% + 14px);
+  animation: satSignal 1.6s ease-in-out infinite;
+}
+@keyframes satSignal {
+  0%, 100% { opacity: 1;  box-shadow: 0 0 8px var(--clr-accent), 0 0 16px rgba(77,166,255,.6); }
+  50%       { opacity: .2; box-shadow: 0 0 3px var(--clr-accent); }
+}
+
+/* ─── Icon colour helpers ─────────────────────────────────────────────────── */
+.tech-html   { color: #e34c26; }
+.tech-css    { color: #264de4; }
+.tech-js     { color: #f7df1e; }
+.tech-react  { color: #61dafb; }
+.tech-node   { color: #68a063; }
+.tech-py     { color: #3776ab; }
+.tech-php    { color: #8892be; }
+.tech-db     { color: #00758f; }
+.tech-git    { color: #f05032; }
+.tech-docker { color: #2496ed; }
