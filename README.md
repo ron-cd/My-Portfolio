@@ -2,7 +2,7 @@
 
 > A space-themed personal portfolio with a scroll-driven satellite, realistic CSS Earth, particle systems, and smooth section animations. Built with **vanilla HTML, CSS, and JavaScript** — zero frameworks, zero build tools required.
 
-![Preview](assets/images/og-image.png)
+![Preview](assets/img/og-image.png)
 
 ---
 
