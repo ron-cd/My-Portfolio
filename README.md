@@ -3,9 +3,8 @@
 Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, and Three.js. The site ships as static files and is ready for GitHub Pages, Netlify, Vercel, or any static host.
 
 ## What Ships
-=======
+
 ![Preview](assets/img/og-image.png)
->>>>>>> 42a9438064d6abbac2c9a51c85f0b3097ac71d11
 
 - Full-screen animated space background on canvas
 - Three.js OBJ satellite with responsive scroll path, auto-rotation, and drag rotation
