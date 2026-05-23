@@ -1,216 +1,99 @@
-# Deployment Guide
+# Deployment
 
-This document covers every way to get the portfolio live, from GitHub Pages (free) to a custom domain with HTTPS.
-
----
-
-## 1. GitHub Pages (Recommended — Free)
-
-### Step 1: Create the repository
-
-```bash
-cd aaron-portfolio
-git init
-git add .
-git commit -m "feat: initial portfolio release"
-```
-
-Go to [github.com/new](https://github.com/new) and create a **public** repository named `aaron-portfolio` (or your GitHub username for a user page: `YOUR_USERNAME.github.io`).
-
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/aaron-portfolio.git
-git branch -M main
-git push -u origin main
-```
-
-### Step 2: Enable Pages
-
-1. Open the repo on GitHub
-2. **Settings → Pages**
-3. Source: **Deploy from a branch**
-4. Branch: `main` / folder: `/ (root)`
-5. Click **Save**
-
-Your site will be live at:
-```
-https://YOUR_USERNAME.github.io/aaron-portfolio/
-```
-
-> If you name the repo exactly `YOUR_USERNAME.github.io`, it will be served at the root (`https://YOUR_USERNAME.github.io/`).
-
-### Step 3: Update the canonical URL
-
-In `index.html`, replace the canonical link:
-```html
-<link rel="canonical" href="https://YOUR_USERNAME.github.io/aaron-portfolio/" />
-```
-
-And the Open Graph / Twitter URLs:
-```html
-<meta property="og:url" content="https://YOUR_USERNAME.github.io/aaron-portfolio/" />
-```
+This portfolio is a static site — no build step, no server runtime. Drop the files on any static host.
 
 ---
 
-## 2. Netlify (Drag & Drop — Free)
+## GitHub Pages (recommended)
 
-1. Go to [app.netlify.com](https://app.netlify.com)
-2. Drag the **entire `aaron-portfolio/` folder** onto the deploy zone
-3. Netlify assigns a random subdomain (e.g. `quirky-goldfish-abc123.netlify.app`)
-4. Rename it under **Site settings → Domain management → Options → Edit site name**
+1. Push the repository to GitHub.
+2. Go to **Settings → Pages**.
+3. Set the source to the `main` branch, root folder `/`.
+4. GitHub Pages will serve `index.html` automatically.
+5. Update the canonical URL and OG tags in `index.html`:
+   ```html
+   <link rel="canonical" href="https://your-username.github.io/" />
+   <meta property="og:url" content="https://your-username.github.io/" />
+   ```
 
-### Netlify via CLI
-
-```bash
-npm install -g netlify-cli
-netlify login
-netlify deploy --dir . --prod
-```
-
-### Netlify `_headers` file (recommended for security)
-
-Create `aaron-portfolio/_headers`:
-
-```
-/*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self';
-```
+For a custom domain, add a `CNAME` file to the repo root containing your domain, then configure DNS with your registrar.
 
 ---
 
-## 3. Vercel (Free)
+## Netlify
 
-```bash
-npm install -g vercel
-vercel login
-vercel --prod
-```
+1. Drag and drop the project folder onto [netlify.com/drop](https://app.netlify.com/drop), or connect the GitHub repo.
+2. No build command needed. Publish directory: `/` (root).
+3. Netlify will detect `index.html` as the entry point.
 
-Vercel auto-detects a static site. No config needed.
+### Netlify Forms (contact form)
 
----
+The contact form is already wired for Netlify Forms:
 
-## 4. Custom Domain
-
-### On GitHub Pages
-
-1. Buy a domain (Namecheap, Cloudflare, Google Domains, etc.)
-2. GitHub → Settings → Pages → **Custom domain** → enter `yourdomain.com`
-3. At your registrar, add these DNS records:
-
-| Type  | Name | Value                    |
-|-------|------|--------------------------|
-| A     | @    | 185.199.108.153          |
-| A     | @    | 185.199.109.153          |
-| A     | @    | 185.199.110.153          |
-| A     | @    | 185.199.111.153          |
-| CNAME | www  | YOUR_USERNAME.github.io  |
-
-4. Wait up to 24 hours for DNS propagation
-5. Tick **Enforce HTTPS** in GitHub Pages settings
-
-### On Netlify
-
-1. **Site settings → Domain management → Add custom domain**
-2. Follow Netlify's DNS instructions (they provide nameservers)
-3. HTTPS is automatic via Let's Encrypt
+- `index.html` includes `name="contact"`, `method="POST"`, `data-netlify="true"`, a `form-name` hidden input, and a honeypot field.
+- `js/main.js` keeps the custom validation, then posts the form to Netlify using `application/x-www-form-urlencoded`.
+- Submissions appear in the Netlify dashboard under **Forms** after the site is deployed.
 
 ---
 
-## 5. Contact Form — Backend Options
+## Vercel
 
-The form currently shows a success state on submit but doesn't send email. Choose one:
-
-### Option A: Formspree (easiest, free tier)
-
-1. Sign up at [formspree.io](https://formspree.io)
-2. Create a new form → copy your endpoint URL
-3. In `js/main.js`, replace the form submit handler:
-
-```js
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-  const data = new FormData(form);
-  const res  = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
-    method: 'POST',
-    body: data,
-    headers: { Accept: 'application/json' },
-  });
-
-  if (res.ok) {
-    btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
-    btn.classList.add('sent');
-    form.reset();
-  } else {
-    btn.innerHTML = '<i class="fas fa-times"></i> Error — try again';
-  }
-
-  setTimeout(() => {
-    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-    btn.classList.remove('sent');
-    btn.disabled = false;
-  }, 4000);
-});
-```
-
-### Option B: EmailJS (client-side, free tier)
-
-1. Sign up at [emailjs.com](https://emailjs.com)
-2. Create a service + email template
-3. Add their SDK before `</body>`:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init('YOUR_PUBLIC_KEY');</script>
-```
-
-4. In the submit handler, call:
-```js
-emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form);
-```
-
-### Option C: Netlify Forms (zero code, Netlify only)
-
-Add `netlify` attribute to your form tag:
-```html
-<form class="contact-form" id="contact-form" netlify name="contact" novalidate>
-```
-Netlify intercepts submissions automatically. View them in the dashboard.
+1. Import the GitHub repository on [vercel.com](https://vercel.com).
+2. Framework preset: **Other**.
+3. Build command: *(leave blank)*
+4. Output directory: `.` (root)
+5. Deploy.
 
 ---
 
-## 6. Pre-launch Checklist
+## Third-Party Form Services
 
-### Content
-- [ ] Replace all placeholder names, emails, URLs with real ones
-- [ ] Add real project screenshots or update emoji thumbnails
-- [ ] Add real GitHub/LinkedIn/Twitter links
-- [ ] Upload your CV as `assets/Aaron-Dela-Cruz-CV.pdf`
-- [ ] Create a 1200×630px `assets/images/og-image.png` for social sharing
+### Formspree
 
-### Assets
-- [ ] Generate favicons from [realfavicongenerator.net](https://realfavicongenerator.net)
-- [ ] Place in `assets/icons/`: `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`
-- [ ] Update `assets/icons/site.webmanifest` with your site name and colours
+1. Sign up at [formspree.io](https://formspree.io) and create a form.
+2. Add `action` and `method` to the form:
+   ```html
+   <form action="https://formspree.io/f/your-form-id" method="POST">
+   ```
+3. Remove the `novalidate` attribute (or keep it and rely on your JS validation).
+4. Formspree handles submission and sends you an email.
 
-### Technical
-- [ ] Test on Chrome, Firefox, Safari, and mobile
-- [ ] Run Lighthouse audit (target: Performance ≥ 90, Accessibility ≥ 95)
-- [ ] Validate HTML at [validator.w3.org](https://validator.w3.org)
-- [ ] Check all links work (no `href="#"` placeholders left)
-- [ ] Wire up contact form backend
-- [ ] Set canonical URL to your real domain
-- [ ] Add `_headers` (Netlify) or equivalent security headers
-- [ ] Enable HTTPS
+### EmailJS
 
-### SEO
-- [ ] Submit sitemap to Google Search Console
-- [ ] Verify Open Graph image with [opengraph.xyz](https://www.opengraph.xyz)
-- [ ] Add `robots.txt` if needed (default: allow all)
+1. Sign up at [emailjs.com](https://www.emailjs.com) and create a service + template.
+2. Add the EmailJS SDK to `index.html`:
+   ```html
+   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+   ```
+3. In `js/main.js` inside `initContactForm()`, replace the fake submit handler:
+   ```js
+   form.addEventListener('submit', e => {
+     e.preventDefault();
+     if (!validate()) return;
+     emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form)
+       .then(() => { /* show success */ })
+       .catch(() => { /* show error */ });
+   });
+   ```
+
+---
+
+## Assets Checklist Before Launch
+
+- [ ] Replace `assets/images/og-image.png` with a real 1200×630px social preview image.
+- [ ] Replace `assets/Aaron-Dela-Cruz-CV.pdf` with your actual CV.
+- [ ] Update `robots.txt` if you want to disallow any paths.
+- [ ] Update `sitemap.xml` with your real domain.
+- [ ] Verify `canonical` and OG/Twitter meta tags point to the correct URL.
+- [ ] Test the contact form end-to-end on the deployed Netlify site.
+- [ ] Run Lighthouse in Chrome DevTools and aim for 90+ on Performance, Accessibility, Best Practices, SEO.
+
+---
+
+## Performance Notes
+
+- **Fonts** are loaded with `<link rel="preload">` and `onload="this.rel='stylesheet'"` for non-blocking async loading.
+- **Font Awesome** is also preloaded the same way.
+- **Three.js** and **GSAP** libs are served from `libs/` (local copies), avoiding CDN latency.
+- **`three.min.js`** and **`OBJLoader.js`** use `defer` to avoid blocking the parser.
+- The satellite `.obj` model and textures are ~3MB combined. If initial load is slow on mobile, consider reducing texture resolution or lazy-loading the satellite canvas after the first user interaction.

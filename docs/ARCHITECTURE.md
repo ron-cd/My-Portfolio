@@ -1,173 +1,120 @@
 # Architecture
 
-A deep-dive into how the codebase is structured, why each decision was made, and how the pieces connect.
+This portfolio is a static site with focused JavaScript modules. There is no bundler and no framework runtime.
 
----
+## Runtime Layers
 
-## Philosophy
-
-- **Zero dependencies** — no React, no Vue, no GSAP, no bundler. Ships as-is.
-- **ES Modules** — `import`/`export` for clean separation of concerns and tree-shaking potential.
-- **Performance first** — every animation uses only `transform` + `opacity` (GPU composited). No layout-triggering properties (no `top`, `left`, `width`, `height` in animation loops).
-- **Progressive enhancement** — the page is readable without JS. Animations layer on top.
-- **Accessibility** — ARIA attributes, semantic HTML, reduced-motion support throughout.
-
----
-
-## Module Map
-
-```
-js/
-├── utils.js        Pure math functions — no DOM, no side effects
-│                   lerp · clamp · easeInOutCubic · mapRange · debounce
-│
-├── scroll.js       Scroll tracker singleton
-│                   - Listens to window scroll with rAF-gated updates
-│                   - Computes scrollProgress [0..1] across full page
-│                   - Detects active section; fires 'sectionChange' event
-│                   - Exposes .on(fn) subscription API
-│
-├── animation.js    Three independent systems, all imported by main.js
-│   ├── spaceAnimator   Scroll-driven satellite sweep (waypoint lerp)
-│   ├── initParticles   Canvas floating star-dust
-│   └── initScrollReveal IntersectionObserver fade-in
-│
-└── main.js         Boot file — imports everything, calls init()
-    ├── initNavbar          Scroll glass + mobile toggle + active links
-    ├── initCarousel        Keyboard / touch / autoplay project carousel
-    ├── initSkillBars       IntersectionObserver bar animation
-    ├── initContactForm     Client-side submit feedback
-    ├── initTyping          Typewriter role animation
-    ├── initCursorGlow      Lagged mouse radial glow (desktop only)
-    └── initResizeHandler   Carousel breakpoint reset
+```text
+index.html
+├── css/base.css            — tokens, reset, utilities
+├── css/space.css           — space background and satellite canvas defaults
+├── css/sections.css        — all section & component styles
+├── libs/gsap.min.js        — GSAP core
+├── libs/ScrollTrigger.min.js
+├── libs/three.min.js       — Three.js r139 (UMD build)
+├── libs/OBJLoader.js
+├── js/space-bg.js          — canvas starfield (deferred)
+├── js/satellite.js         — Three.js satellite renderer (deferred)
+└── js/main.js              — entry point (type="module")
+     ├── imports utils.js
+     ├── imports scroll.js
+     └── imports animation.js
 ```
 
----
+## CSS Responsibilities
 
-## Z-Index Stack
+| File | Purpose | Edit when… |
+|---|---|---|
+| `base.css` | Design tokens, reset, typography helpers, buttons, containers | Changing brand colours, fonts, or global spacing |
+| `space.css` | Fixed background layer and satellite loader defaults | Adjusting starfield or satellite loading UI |
+| `sections.css` | Section layouts, all components, responsive hardening | Adding or styling new sections/components |
 
-| Layer | z-index | Elements |
-|-------|---------|----------|
-| Background | -1 | `.bg-gradient`, `.space-layer` (particles, nebulas), `#space-globe` |
-| Satellite | 1 | `#space-satellite` — above section BGs, below content |
-| Section content | 2 | `section .container`, `section > .section-inner` |
-| Navbar | 100 | `.nav` |
-| Preloader | 9999 | `.preloader` |
+Production breakpoint overrides live late in `sections.css` and intentionally override component defaults.
 
-**Why sections don't have `z-index`:**  
-If a section element has both `position: relative` and `z-index`, it creates a stacking context that completely isolates its children. Nothing from outside (like the satellite) can appear between the section and its children. By removing `z-index` from sections and only setting it on their `.container` wrappers, the satellite (at z-index 1) correctly appears above section backgrounds but below content (z-index 2).
+**CSS Table of Contents** (in `sections.css`):
+1. Navbar
+2. Hero
+3. About
+4. Skills
+5. Contact
+6. Footer
+7. Certifications
+8. Premium About (orbit card)
+9. Skills Belt
+10. Projects — Hologram Projection Interface
+11. Responsive Hardening (1440px → 380px + landscape)
 
----
+## JavaScript Responsibilities
 
-## Satellite Animation System
+| File | Purpose |
+|---|---|
+| `main.js` | App boot: navbar, typing text, contact form, cursor glow, hero parallax |
+| `animation.js` | GSAP scroll reveals, skill bar fills, cert gallery, projects hologram |
+| `satellite.js` | Three.js satellite renderer, model loading, drag rotation, scroll path |
+| `space-bg.js` | Canvas starfield, nebulae, Milky Way, shooting stars |
+| `scroll.js` | Scroll progress tracking, active-section detection, `sectionChange` events |
+| `utils.js` | Shared math/motion helpers: `lerp`, `clamp`, `debounce`, `prefersReducedMotion` |
 
-```
-scrollTracker.on(progress)
-        │
-        ▼
-spaceAnimator._updateTargets(progress)
-  - Finds surrounding waypoints A and B
-  - Computes t = (progress - A.p) / (B.p - A.p)
-  - Applies easeInOutCubic(t)
-  - Sets _tgtX, _tgtY (viewport fraction → px)
-  - Interpolates rotation via shortest-path angle
-        │
-        ▼
-spaceAnimator._loop()  [rAF — every frame]
-  - lerp(_cur*, _tgt*, 0.07) for smooth trailing
-  - Applies transform: translate() rotate()
-  - opacity: 0.92 constant (always visible)
-```
+## Z-Index Model
 
-**Waypoints** define the path as `{ p, x, y, rot }` where:
-- `p` — scroll progress trigger (0 = top, 1 = bottom)
-- `x` — viewport fraction from left (0.0–1.0)
-- `y` — viewport fraction from top  (0.0–1.0)
-- `rot` — satellite tilt in degrees
+| Layer | z-index | Purpose |
+|---|---|---|
+| Space background | -2 to -1 | Gradients and canvas starfield |
+| Satellite canvas | 1 | Fixed Three.js satellite |
+| Section content | 2+ | Readable UI above decorative layers |
+| Navbar | 100 | Persistent navigation |
+| Preloader | 9999 | Initial loading screen |
+| Skip link | 10000 | Accessibility shortcut |
 
-The `lerp` speed `0.07` creates a trailing lag. Increase it (e.g. `0.15`) for snappier following, decrease it (e.g. `0.03`) for more inertia.
+Avoid adding `z-index` directly to full `<section>` elements unless necessary. Section-level stacking contexts can trap the satellite behind content.
 
----
+## Satellite System
 
-## Globe
+`js/satellite.js` owns the Three.js satellite. It loads `assets/satellite/Satellite.obj`, applies the texture maps in `assets/satellite/textures/`, and animates a fixed canvas through GSAP ScrollTrigger.
 
-The Earth is **100% CSS** — no JS ever touches it.
+Three responsive waypoint profiles:
+- `WAYPOINTS.desktop`
+- `WAYPOINTS.tablet`
+- `WAYPOINTS.mobile`
 
-```
-#space-globe
-  position: fixed; bottom: -28vw; right: -16vw;
-  width: 88vw; max-width: 920px;
-  z-index: -1;
-  transform: none !important;   ← prevents any JS from moving it
-```
+**Rule:** All profiles must have the same number of waypoints with matching `p` values. ScrollTrigger safely refreshes positions on viewport change.
 
-The realistic texture is built from ~14 layered `radial-gradient()` calls:
-- Deep ocean base
-- Continental masses (Africa, Americas, Asia, Europe, Australia)
-- Coastal shallow teal
-- Polar ice caps
-- Atmospheric haze at the limb
-
-Two `::before`/`::after` pseudo-elements add cloud drift and specular highlight. The `cloudDrift` animation rotates the cloud layer at a different speed from the subtle hue-shift on the sphere body.
-
----
-
-## Scroll Reveal
-
-Uses a single `IntersectionObserver` watching all `.reveal`, `.reveal-left`, `.reveal-right` elements. When they enter the viewport (with a -55px bottom rootMargin so they trigger slightly early):
-
-1. The element gets `.revealed` → CSS transitions `opacity` and `transform`
-2. Any `.reveal-child` descendants get `.revealed` with staggered `transitionDelay` (80ms per child)
-
-The observer `unobserve`s after triggering — once revealed, always revealed.
-
----
-
-## CSS Architecture
-
-```
-base.css      Design tokens (:root) + reset + global utilities
-              (buttons, tags, containers, reveal classes)
-              Loaded first — sets the foundation.
-
-space.css     All space elements:
-              - .bg-gradient, .space-layer, .nebula, .shooting-star
-              - #space-globe (Earth sphere, atmosphere, ring)
-              - #space-satellite (ISS-style: truss, modules, solar arrays)
-              Loaded second — overrides nothing in base.
-
-sections.css  Per-section layout and component styles:
-              .nav, #hero, #about, #skills, #projects, #contact, .footer
-              Loaded last — most specific rules.
+```js
+// Example waypoint shape
+{ p: 0.60, x: 0.88, y: 0.70, rotZ: -52, scale: 0.72 }
+// p     = page scroll progress [0..1]
+// x, y  = viewport fractions
+// rotZ  = canvas tilt in degrees
+// scale = responsive visual size multiplier
 ```
 
-**No `!important` anywhere** except `transform: none !important` on `#space-globe` to explicitly block the old JS transform in case the file is patched.
+**Rule:** Do not add GSAP tweens that animate `x`, `y`, `scale`, or `rotation` on `#sat-canvas`. ScrollTrigger owns those transform properties.
 
----
+## GSAP Reveal System
 
-## Adding a New Section
+`animation.js` uses `fromTo` animations for scroll reveals. Skill bar fills are defensive:
+- If GSAP is unavailable, bars get their final `data-width` immediately.
+- If a bar is already visible on load, it is set immediately.
+- If offscreen, it animates when scrolled into view.
 
-1. Add the HTML in `index.html` between existing sections
-2. Register the section ID in `main.js`:
-   ```js
-   scrollTracker.registerSections(['hero','about','skills','projects','NEW_SECTION','contact']);
-   ```
-3. Add a nav link in the `<nav>` block
-4. Add CSS in `sections.css`
-5. Optionally add a waypoint in `animation.js` to route the satellite past it
+## Projects — Hologram Interface
 
----
+The projects section uses a hologram projection interface (`#projects-dock`):
 
-## Adding a New Project Card
+- **Desktop:** GSAP-pinned stage. Scrolling through the section cycles between projects.
+- **Mobile (`≤760px`):** All project panels are shown in a stacked layout (no pin).
 
-Copy an existing `<article class="project-card">` block in `index.html` and update:
-- `project-num` span (e.g. `05 / 05`)
-- `style="background:..."` on `.project-img` — use any gradient
-- Emoji icon
-- `.project-meta` tags
-- `h3.project-title`
-- `p.project-desc`
-- `.project-tech` tags
-- `href` on both action buttons
+The Three.js hologram canvas (`#projects-hologram-canvas`) renders a rotating orbit sphere that responds to mouse position and changes colour per project.
 
-The carousel picks up new cards automatically — no JS changes needed.
+**To add a project:** Copy an existing `<article class="project-holo-panel">` block in `index.html` and update:
+- `data-holo-color`, `data-holo-accent`, `data-holo-icon`
+- `data-holo-label-a/b/c` (appear in the hologram visual)
+- Kicker text, title, description, metadata, tech tags, and action buttons
+- Add a corresponding dot button in `.project-holo-progress`
+
+## Certifications Gallery
+
+The certifications section uses a GSAP-pinned card-stack (`initCertGallery` in `animation.js`):
+
+- **Desktop:** Cards stack with 3D transforms as you scroll.
+- **Mobile (`≤768px`):** Falls back to a flat grid (`.cert-stack-compact` class applied).

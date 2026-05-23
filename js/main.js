@@ -1,22 +1,34 @@
 /**
  * main.js — Entry point: wires all modules and boots the portfolio
  * ─────────────────────────────────────────────────────────────────
- * Author : Aaron Dela Cruz
- * Updated: 2025
+ * Author  : Aaron Dela Cruz
+ * Updated : 2026
  *
  * Load order (all deferred via type="module"):
  *   utils.js → scroll.js → animation.js → main.js
+ *
+ * SECTIONS
+ * ────────────────────────────────────────────────────────────────
+ * 1. initNavbar()       — scroll-glass nav, hamburger, active link
+ * 2. initScrollProgress()— top-of-page progress bar
+ * 3. initSkillsBelt()   — clones skill items for seamless CSS loop
+ * 4. initContactForm()  — client-side validation (no backend yet)
+ *                         See docs/DEPLOYMENT.md to wire a service
+ * 5. initTyping()       — typewriter role-text cycle in the hero
+ * 6. initCursorGlow()   — desktop-only mouse-following glow
+ * 7. initHeroMotion()   — GSAP parallax on hero ambient layers
+ * 8. DOMContentLoaded   — boot sequence
  */
 
 'use strict';
 
-import { lerp, debounce, prefersReducedMotion } from './utils.js';
+import { lerp, prefersReducedMotion } from './utils.js';
 import { scrollTracker }                         from './scroll.js';
-import { spaceAnimator, initParticles, initScrollReveal } from './animation.js';
+import { initScrollReveal } from './animation.js';
 
 /* ============================================================
-  NAVBAR
-  Active link highlighting + mobile toggle + scroll-glass
+   NAVBAR
+   Active link highlighting + mobile toggle + scroll-glass
    ============================================================ */
 function initNavbar() {
   const nav    = document.getElementById('main-nav');
@@ -31,25 +43,41 @@ function initNavbar() {
     nav.classList.toggle('nav--scrolled', scrollY > 60);
   });
 
-  // Mobile hamburger toggle
-  toggle?.addEventListener('click', () => {
-    const isOpen = links.classList.toggle('nav-links--open');
-    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    const icon = toggle.querySelector('i');
+  const setMenuOpen = isOpen => {
+    links.classList.toggle('nav-links--open', isOpen);
+    nav.classList.toggle('nav--menu-open', isOpen);
+    document.body.classList.toggle('nav-menu-open', isOpen);
+    toggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    const icon = toggle?.querySelector('i');
     if (icon) {
       icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
     }
+  };
+
+  // Mobile hamburger toggle
+  toggle?.addEventListener('click', () => {
+    setMenuOpen(!links.classList.contains('nav-links--open'));
   });
 
   // Close menu on any link click (mobile)
   navAs.forEach(a => {
     a.addEventListener('click', () => {
-      links.classList.remove('nav-links--open');
-      toggle?.setAttribute('aria-expanded', 'false');
-      const icon = toggle?.querySelector('i');
-      if (icon) icon.className = 'fas fa-bars';
+      setMenuOpen(false);
     });
   });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && links.classList.contains('nav-links--open')) {
+      setMenuOpen(false);
+      toggle?.focus();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && links.classList.contains('nav-links--open')) {
+      setMenuOpen(false);
+    }
+  }, { passive: true });
 
   // Highlight active section link
   document.addEventListener('sectionChange', e => {
@@ -61,134 +89,170 @@ function initNavbar() {
 }
 
 /* ============================================================
-  PROJECTS CAROUSEL
-  Keyboard, touch-swipe, auto-play, dot navigation
+   SCROLL PROGRESS
+   Lightweight transform-only progress indicator
    ============================================================ */
-function initCarousel() {
-  const track  = document.getElementById('projects-track');
-  const dotsEl = document.getElementById('carousel-dots');
-  const prev   = document.querySelector('.carousel-prev');
-  const next   = document.querySelector('.carousel-next');
-  if (!track) return;
+function initScrollProgress() {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
 
-  const cards = [...track.querySelectorAll('.project-card')];
-  if (!cards.length) return;
-
-  let cur = 0, animating = false;
-
-  // Build dots
-  cards.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.className    = `carousel-dot${i === 0 ? ' active' : ''}`;
-    dot.setAttribute('aria-label', `Go to project ${i + 1}`);
-    dot.addEventListener('click', () => goTo(i));
-    dotsEl?.appendChild(dot);
-  });
-
-  function goTo(idx) {
-    if (animating || window.innerWidth <= 768) return;
-    animating = true;
-    cur = (idx + cards.length) % cards.length;
-
-    cards.forEach((card, i) => {
-      card.classList.remove('active', 'prev', 'next');
-      if      (i === cur)                                card.classList.add('active');
-      else if (i === (cur - 1 + cards.length) % cards.length) card.classList.add('prev');
-      else if (i === (cur + 1) % cards.length)           card.classList.add('next');
-    });
-
-    document.querySelectorAll('.carousel-dot')
-      .forEach((d, i) => d.classList.toggle('active', i === cur));
-
-    setTimeout(() => { animating = false; }, 520);
-  }
-
-  prev?.addEventListener('click', () => goTo(cur - 1));
-  next?.addEventListener('click', () => goTo(cur + 1));
-
-  // Keyboard arrows (only when projects section is visible)
-  document.addEventListener('keydown', e => {
-    const projectsEl = document.getElementById('projects');
-    if (!projectsEl) return;
-    const rect = projectsEl.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.5) {
-      if (e.key === 'ArrowLeft')  goTo(cur - 1);
-      if (e.key === 'ArrowRight') goTo(cur + 1);
-    }
-  });
-
-  // Touch swipe
-  let touchStartX = 0;
-  track.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-  track.addEventListener('touchend', e => {
-    const delta = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(delta) > 50) goTo(delta > 0 ? cur + 1 : cur - 1);
-  });
-
-  // Auto-play; pause on hover
-  let autoPlay = setInterval(() => goTo(cur + 1), 4200);
-  track.addEventListener('mouseenter', () => clearInterval(autoPlay));
-  track.addEventListener('mouseleave', () => {
-    autoPlay = setInterval(() => goTo(cur + 1), 4200);
-  });
-
-  goTo(0);
-}
-
-/* ============================================================
-  SKILL BARS
-  Animate width when bar scrolls into view
-   ============================================================ */
-function initSkillBars() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const bar = entry.target;
-      bar.style.width = (bar.dataset.width || '0') + '%';
-      observer.unobserve(bar);
-    });
-  }, { threshold: 0.3 });
-
-  document.querySelectorAll('.skill-fill').forEach(bar => {
-    bar.style.width = '0';
-    observer.observe(bar);
+  scrollTracker.on(({ progress }) => {
+    bar.style.transform = `scaleX(${progress})`;
   });
 }
 
 /* ============================================================
-  CONTACT FORM
-  Client-side submit feedback (no backend wired here yet)
-  See docs/DEPLOYMENT.md for how to connect a form service
+   SKILLS BELT
+   Duplicates the editable skill panels once for a seamless CSS loop.
+   ============================================================ */
+function initSkillsBelt() {
+  const track = document.getElementById('skills-belt-track');
+  if (!track || prefersReducedMotion()) return;
+  if (track.dataset.cloned === 'true') return;
+
+  const originals = [...track.querySelectorAll(':scope > .skill-belt-item')];
+  if (originals.length < 4) return;
+
+  originals.forEach(item => {
+    const clone = item.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+  });
+
+  track.dataset.cloned = 'true';
+  track.classList.add('is-looping');
+}
+
+/* ============================================================
+   CONTACT FORM
+   Client-side validation + Netlify Forms POST
    ============================================================ */
 function initContactForm() {
   const form = document.getElementById('contact-form');
   const btn  = document.getElementById('submit-btn');
   if (!form || !btn) return;
+  const status = document.getElementById('form-status');
 
-  form.addEventListener('submit', e => {
+  const fields = {
+    name: form.elements.name,
+    email: form.elements.email,
+    message: form.elements.message,
+  };
+
+  const errors = {
+    name: document.getElementById('name-error'),
+    email: document.getElementById('email-error'),
+    message: document.getElementById('message-error'),
+  };
+
+  function setError(field, message) {
+    const input = fields[field];
+    if (!input) return;
+    input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    if (errors[field]) errors[field].textContent = message;
+  }
+
+  function setStatus(message, state = '') {
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = state;
+  }
+
+  function validate() {
+    let valid = true;
+    const emailValue = fields.email?.value.trim() || '';
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+
+    if (!fields.name?.value.trim()) {
+      setError('name', 'Enter your name.');
+      valid = false;
+    } else {
+      setError('name', '');
+    }
+
+    if (!emailValue) {
+      setError('email', 'Enter an email address.');
+      valid = false;
+    } else if (!emailOk) {
+      setError('email', 'Enter a valid email address.');
+      valid = false;
+    } else {
+      setError('email', '');
+    }
+
+    if (!fields.message?.value.trim()) {
+      setError('message', 'Write a short message.');
+      valid = false;
+    } else {
+      setError('message', '');
+    }
+
+    return valid;
+  }
+
+  Object.values(fields).forEach(input => {
+    input?.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') === 'true') validate();
+    });
+  });
+
+  form.addEventListener('submit', async e => {
     e.preventDefault();
+    setStatus('');
+    if (!validate()) {
+      const firstInvalid = form.querySelector('[aria-invalid="true"]');
+      firstInvalid?.focus();
+      return;
+    }
+
     const original = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
-    btn.classList.add('sent');
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Sending...';
     btn.disabled = true;
+
+    try {
+      const data = new FormData(form);
+      const response = await fetch(form.getAttribute('action') || '/', {
+        method: form.getAttribute('method') || 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString(),
+      });
+
+      if (!response.ok) throw new Error(`Netlify form post failed: ${response.status}`);
+
+      btn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Message Sent';
+      btn.classList.add('sent');
+      form.reset();
+      Object.keys(fields).forEach(field => setError(field, ''));
+      setStatus('Thanks. Your message was sent.', 'success');
+    } catch (error) {
+      console.error(error);
+      btn.innerHTML = original;
+      btn.classList.remove('sent');
+      btn.disabled = false;
+      setStatus('Message could not be sent. Please email me directly.', 'error');
+      return;
+    }
+
     setTimeout(() => {
       btn.innerHTML = original;
       btn.classList.remove('sent');
       btn.disabled = false;
-      form.reset();
+      setStatus('');
     }, 3000);
   });
 }
 
 /* ============================================================
-  TYPING ANIMATION
-  Cycles through role strings with a typewriter effect
+   TYPING ANIMATION
+   Cycles through role strings with a typewriter effect
    ============================================================ */
 function initTyping() {
   const el = document.querySelector('.typing-text');
   if (!el) return;
+  if (prefersReducedMotion()) {
+    el.textContent = 'Full-Stack Developer';
+    return;
+  }
 
   const texts = [
     'Frontend Developer',
@@ -224,8 +288,8 @@ function initTyping() {
 }
 
 /* ============================================================
-  CURSOR GLOW  (desktop only)
-  Soft radial gradient that follows the mouse with lag
+   CURSOR GLOW  (desktop only)
+   Soft radial gradient that follows the mouse with lag
    ============================================================ */
 function initCursorGlow() {
   if (window.innerWidth < 768 || prefersReducedMotion()) return;
@@ -252,45 +316,57 @@ function initCursorGlow() {
 }
 
 /* ============================================================
-  RESIZE HANDLER
-  Resets carousel state when crossing the mobile breakpoint
+   HERO MOTION
+   Decorative scroll depth for existing hero layers
    ============================================================ */
-function initResizeHandler() {
-  window.addEventListener('resize', debounce(() => {
-    const isMobile = window.innerWidth <= 768;
-    const cards    = document.querySelectorAll('.project-card');
-    if (isMobile) {
-      cards.forEach(c => c.classList.remove('active', 'prev', 'next'));
-    } else {
-      const hasActive = [...cards].some(c => c.classList.contains('active'));
-      if (!hasActive && cards[0]) cards[0].classList.add('active');
-    }
-  }, 150));
+function initHeroMotion() {
+  if (prefersReducedMotion()) return;
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.to('.hero-ambient', {
+    yPercent: 8,
+    scale: 1.04,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+    },
+  });
+
+  gsap.to('.hero-grid-overlay', {
+    yPercent: -6,
+    opacity: .55,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+    },
+  });
 }
 
 /* ============================================================
-  BOOT — DOMContentLoaded
+   BOOT — DOMContentLoaded
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   // Core systems
-  scrollTracker.registerSections(['hero', 'about', 'skills', 'certifications', 'projects', 'contact']);
   scrollTracker.init();
-  scrollTracker._detectActive();
-
-  // Space
-  spaceAnimator.init();
-  initParticles();
+  scrollTracker.registerSections(['hero', 'about', 'skills', 'certifications', 'projects', 'contact']);
 
   // UI
   initScrollReveal();
+  initScrollProgress();
   initNavbar();
-  initCarousel();
-  initSkillBars();
+  initSkillsBelt();
   initContactForm();
   initTyping();
   initCursorGlow();
-  initResizeHandler();
-
+  initHeroMotion();
   // Remove preloader
   setTimeout(() => document.body.classList.add('loaded'), 600);
 });

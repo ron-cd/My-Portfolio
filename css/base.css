@@ -1,55 +1,110 @@
 /* =============================================================================
-  base.css — Design Tokens, Reset & Global Utilities
-  Author : Aaron Dela Cruz
-  Updated: 2025
+   base.css — Fonts, Design Tokens, Reset & Global Utilities
+   Author  : Aaron Dela Cruz
+   Updated : 2026
+
+   TABLE OF CONTENTS
+   ─────────────────────────────────────────────────────────────────────────────
+   0. Fonts           — @import (Google Fonts) + font-family tokens
+                        ★ THIS IS THE ONLY PLACE YOU NEED TO CHANGE FONTS ★
+   1. Design Tokens   — Colours, motion, spacing, and layout vars
+   2. Reset           — Box-model, typography defaults, focus & selection styles
+   3. Preloader       — Full-screen loading spinner (.preloader / .preloader-ring)
+   4. Cursor Glow     — Desktop-only radial cursor effect (.cursor-glow)
+   5. Scroll Reveal   — GSAP-driven reveal classes (.reveal, .reveal-left …)
+   6. Layout Utils    — .container, .section-inner, z-index stacking
+   7. Typography      — .section-label, .section-title, .gradient-text
+   8. Buttons         — .btn, .btn-primary, .btn-ghost, .btn-sm, .btn-disabled
+   9. Tag Pill        — .tag inline code/tech label
+   10. Reduced Motion  — Blanket animation override for prefers-reduced-motion
+   ─────────────────────────────────────────────────────────────────────────────
+   QUICK EDITS:
+     • Swap fonts       → §0 FONTS — change the @import URL + the three --font-* tokens
+     • Brand colours    → §1 DESIGN TOKENS — --clr-accent / --clr-accent-2 / --clr-accent-3
+     • Container width  → §1 DESIGN TOKENS — --container-max
+     • Nav height       → §1 DESIGN TOKENS — --nav-height
    ============================================================================= */
 
-/* ─── Google Fonts ────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §0  FONTS
+   ───────────────────────────────────────────────────────────────────────────
+   HOW TO CHANGE FONTS
+   ────────────────────
+   1. Pick new families on https://fonts.google.com
+   2. Copy the @import URL they give you and replace the one below.
+   3. Update the three --font-* tokens in §1 DESIGN TOKENS to match.
+   That's it — every component reads from those tokens, so nothing else
+   needs to change.
+
+   CURRENT FAMILIES
+   ────────────────────
+   Display : Syne         (headings, nav, buttons)       weights: 400 600 700 800
+   Body    : DM Sans      (paragraphs, descriptions)     weights: 300 400 500  (opsz 9..40)
+   Mono    : JetBrains Mono (code labels, kickers, tags) weights: 400 500
+
+   SWAP EXAMPLE — replacing Syne with Inter for display:
+     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800...');
+     --font-display: 'Inter', sans-serif;
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ─── Design Tokens ───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §1  DESIGN TOKENS  — single source of truth for the whole site
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
   /* Colours */
-  --clr-bg:          #050810;
-  --clr-bg-2:        #0a0f1e;
-  --clr-bg-3:        #0d1426;
-  --clr-surface:     rgba(255,255,255,0.04);
-  --clr-surface-2:   rgba(255,255,255,0.07);
-  --clr-border:      rgba(255,255,255,0.08);
-  --clr-border-2:    rgba(100,180,255,0.2);
-  --clr-text:        #e8edf8;
-  --clr-text-muted:  #7a8aaa;
-  --clr-text-dim:    #3d4a63;
-  --clr-accent:      #4da6ff;
-  --clr-accent-2:    #7b5ea7;
-  --clr-accent-3:    #00d4aa;
-  --clr-glow:        rgba(77,166,255,0.25);
-
-  /* Typography */
+  --clr-bg: #060912;
+  --clr-bg-2: #0a0e1c;
+  --clr-bg-3: #10182b;
+  --clr-bg-deep: #02050b;
+  --clr-surface: rgba(232, 237, 248, 0.045);
+  --clr-surface-2: rgba(232, 237, 248, 0.075);
+  --clr-surface-3: rgba(232, 237, 248, 0.11);
+  --clr-border: rgba(232, 237, 248, 0.095);
+  --clr-border-2: rgba(108, 176, 235, 0.24);
+  --clr-text: #e8edf8;
+  --clr-text-muted: #7a8aaa;
+  --clr-text-dim: #3d4a63;
+  --clr-accent: #64b5f6;
+  --clr-accent-2: #7d719d;
+  --clr-accent-3: #00d4aa;
+  --clr-glow: rgba(100, 181, 246, 0.22);
+  /* Typography — mirror the families imported in §0 FONTS above */
   --font-display: 'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
-
+  /* headings, nav, labels, buttons  */
+  --font-body: 'DM Sans', sans-serif;
+  /* body copy, descriptions         */
+  --font-mono: 'JetBrains Mono', monospace;
+  /* kickers, tags, code, percentages */
   /* Motion */
-  --transition-fast:   150ms cubic-bezier(0.4,0,0.2,1);
-  --transition-normal: 300ms cubic-bezier(0.4,0,0.2,1);
-  --transition-spring: 500ms cubic-bezier(0.34,1.56,0.64,1);
-
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --transition-fast: 160ms var(--ease-out);
+  --transition-normal: 280ms var(--ease-out);
+  --transition-spring: 420ms var(--ease-out);
   /* Shape */
-  --radius-sm:   6px;
-  --radius-md:   14px;
-  --radius-lg:   24px;
+  --radius-sm: 6px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
-
   /* Layout */
   --nav-height: 72px;
   --container-max: 1180px;
 }
 
-/* ─── Reset ───────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §2  RESET
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 *,
 *::before,
-*::after { box-sizing: border-box; margin: 0; padding: 0; }
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html {
   scroll-behavior: smooth;
@@ -59,149 +114,360 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: var(--clr-bg);
+  background: var(--clr-bg-deep);
   color: var(--clr-text);
   overflow-x: hidden;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
-img, video    { max-width: 100%; display: block; }
-a             { color: inherit; text-decoration: none; }
-button        { cursor: pointer; border: none; background: none; font-family: inherit; }
-ul, ol        { list-style: none; }
-input,
-textarea      { font-family: inherit; font-size: inherit; }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: .13;
+  background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .8) 0 1px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(100, 181, 246, .7) 0 1px, transparent 1px);
+  background-size: 180px 180px, 260px 260px;
+  mix-blend-mode: screen;
+}
 
-/* ─── Preloader ───────────────────────────────────────────────────────────── */
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--clr-accent);
+  outline-offset: 4px;
+}
+
+::selection {
+  color: var(--clr-bg-deep);
+  background: var(--clr-accent);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 10000;
+  transform: translateY(-140%);
+  padding: .7rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--clr-text);
+  color: var(--clr-bg-deep);
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: transform var(--transition-fast);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §3  PRELOADER  — shown until body.loaded class is added (js/main.js)
+   Edit: preloader-text string in index.html, timing in main.js setTimeout
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .preloader {
-  position: fixed; inset: 0; z-index: 9999;
-  background: var(--clr-bg);
-  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--clr-bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: opacity 0.7s ease 0.4s;
 }
-body.loaded .preloader { opacity: 0; pointer-events: none; }
-.preloader-inner {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 1.5rem;
+
+body.loaded .preloader {
+  opacity: 0;
+  pointer-events: none;
 }
+
+.preloader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 .preloader-ring {
-  width: 56px; height: 56px;
+  width: 56px;
+  height: 56px;
   border: 2px solid var(--clr-border);
   border-top-color: var(--clr-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+
 .preloader-text {
   font-family: var(--font-mono);
-  font-size: 0.7rem; letter-spacing: 0.2em;
-  color: var(--clr-text-muted); text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── Cursor glow (desktop only) ─────────────────────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §4  CURSOR GLOW  — desktop only, injected by js/main.js initCursorGlow()
+   Edit: size (360px), blend mode, hover colour below
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .cursor-glow {
-  position: fixed; top: 0; left: 0;
-  width: 360px; height: 360px; border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
   background: radial-gradient(circle, var(--clr-glow) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
+  pointer-events: none;
+  z-index: 0;
   mix-blend-mode: screen;
   transform: translate(-50%, -50%);
 }
+
 .cursor-glow--hover {
-  background: radial-gradient(circle, rgba(100,180,255,0.4) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(100, 180, 255, 0.4) 0%, transparent 65%);
 }
 
-/* ─── Scroll-reveal animations ────────────────────────────────────────────── */
-.reveal {
-  opacity: 0; transform: translateY(32px);
-  transition: opacity .7s ease, transform .7s ease;
-}
-.reveal.revealed { opacity: 1; transform: translateY(0); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   §5  SCROLL REVEAL
+   Classes are visible by default; GSAP animates FROM opacity:0 on scroll.
+   Add class="reveal" / "reveal-left" / "reveal-right" to any element.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.reveal-child {
-  opacity: 0; transform: translateY(20px);
-  transition: opacity .5s ease, transform .5s ease;
-}
-.reveal-child.revealed { opacity: 1; transform: translateY(0); }
+/* Reveal classes are visible by default; GSAP handles the from-state.
+   .revealed kept for pure-CSS fallback when JS is disabled. */
 
-.reveal-left {
-  opacity: 0; transform: translateX(-40px);
-  transition: opacity .7s ease, transform .7s ease;
-}
-.reveal-left.revealed { opacity: 1; transform: translateX(0); }
+/* Pure CSS fallback (no-JS) */
 
-.reveal-right {
-  opacity: 0; transform: translateX(40px);
-  transition: opacity .7s ease, transform .7s ease;
+.no-js .reveal,
+.no-js .reveal-child,
+.no-js .reveal-left,
+.no-js .reveal-right {
+  opacity: 1;
+  transform: none;
 }
-.reveal-right.revealed { opacity: 1; transform: translateX(0); }
 
-/* ─── Layout utilities ────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §6  LAYOUT UTILITIES
+   .container  → max-width wrapper (--container-max = 1180px)
+   .section-inner → vertical padding for page sections
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .container {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-.section-inner  { padding: 7rem 0; }
-@media (max-width: 768px) { .section-inner { padding: 5rem 0; } }
+.section-inner {
+  padding: clamp(5.5rem, 10vw, 8.5rem) 0;
+}
+
+@media (max-width: 768px) {
+  .section-inner {
+    padding: 5rem 0;
+  }
+}
 
 /* Section content above satellite (z-index:1) */
+
 section .container,
 section > .section-inner,
-.footer > .container { position: relative; z-index: 2; }
+.footer > .container {
+  position: relative;
+  z-index: 2;
+}
 
-/* ─── Typography helpers ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §7  TYPOGRAPHY HELPERS
+   Edit: .section-title font-size clamp() for heading scale
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .section-label {
   font-family: var(--font-mono);
-  font-size: .75rem; letter-spacing: .15em; text-transform: uppercase;
-  color: var(--clr-accent); margin-bottom: 1rem;
-  display: flex; align-items: center; gap: 1rem;
+  font-size: .75rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--clr-accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
+
 .section-label::before {
-  content: ''; display: block;
-  width: 28px; height: 1px; background: var(--clr-accent);
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--clr-accent);
 }
 
 .section-title {
   font-family: var(--font-display);
   font-size: clamp(2.2rem, 5vw, 3.5rem);
-  font-weight: 800; line-height: 1.1; color: var(--clr-text);
+  font-weight: 800;
+  line-height: 1.04;
+  color: var(--clr-text);
+  text-wrap: balance;
+}
+
+.section-title-spaced {
+  margin-bottom: 1.5rem;
+}
+
+.section-head {
+  max-width: 760px;
+  margin-bottom: 2.5rem;
+}
+
+.section-head-center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-head-center .section-label {
+  justify-content: center;
+}
+
+.section-head-loose {
+  margin-bottom: 4rem;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-3));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--clr-accent);
+  -webkit-text-fill-color: currentColor;
+  background: none;
 }
 
-/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §8  BUTTONS
+   .btn-primary  → solid accent gradient CTA
+   .btn-ghost    → outlined/transparent variant
+   .btn-sm       → small size modifier
+   .btn-disabled → non-interactive state (aria-disabled="true" in HTML)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .btn {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .8rem 1.6rem; border-radius: var(--radius-full);
-  font-family: var(--font-display); font-weight: 600;
-  font-size: .9rem; letter-spacing: .03em;
-  transition: var(--transition-spring);
-  position: relative; overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .8rem 1.6rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .9rem;
+  letter-spacing: .03em;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
 }
+
 .btn-primary {
   background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
-  color: #fff; box-shadow: 0 4px 24px var(--clr-glow);
+  color: var(--clr-text);
+  box-shadow: 0 4px 24px var(--clr-glow);
 }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--clr-glow); }
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px var(--clr-glow);
+}
+
+.btn:active {
+  transform: scale(.97);
+}
+
 .btn-ghost {
-  background: transparent; color: var(--clr-text);
+  background: transparent;
+  color: var(--clr-text);
   border: 1px solid var(--clr-border-2);
 }
-.btn-ghost:hover { border-color: var(--clr-accent); color: var(--clr-accent); transform: translateY(-2px); }
-.btn-sm { padding: .5rem 1rem; font-size: .8rem; }
 
-/* ─── Tag pill ────────────────────────────────────────────────────────────── */
+.btn-ghost:hover {
+  border-color: var(--clr-accent);
+  color: var(--clr-accent);
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: .5rem 1rem;
+  font-size: .8rem;
+}
+
+.btn-disabled {
+  cursor: not-allowed;
+  opacity: .68;
+  filter: saturate(.7);
+}
+
+.btn-disabled:hover,
+.btn-disabled:active {
+  transform: none;
+  box-shadow: 0 4px 24px var(--clr-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §9  TAG PILL  — tech stack / keyword chips (.tag)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .tag {
-  display: inline-block; padding: .25rem .75rem;
+  display: inline-block;
+  padding: .25rem .75rem;
   border-radius: var(--radius-full);
-  background: var(--clr-surface); border: 1px solid var(--clr-border);
-  font-family: var(--font-mono); font-size: .72rem; color: var(--clr-text-muted);
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: var(--clr-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
 }

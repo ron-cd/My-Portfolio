@@ -9,41 +9,60 @@
   <meta name="keywords"           content="Aaron Dela Cruz, frontend developer, backend developer, full stack, portfolio, web developer Philippines" />
   <meta name="author"             content="Aaron Dela Cruz" />
   <meta name="robots"             content="index, follow" />
-  <link rel="canonical"           href="https://aaron-delacruz.github.io/" />
+  <link rel="canonical"           href="https://github.com/ron-cd" />
 
   <!-- ─── Open Graph / Social ─────────────────────────────────────── -->
   <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://aaron-delacruz.github.io/" />
+  <meta property="og:url"         content="https://github.com/ron-cd" />
   <meta property="og:title"       content="Aaron Dela Cruz · Developer" />
   <meta property="og:description" content="Frontend & Backend Developer — building fast, beautiful, accessible digital experiences." />
   <meta property="og:image"       content="assets/images/og-image.png" />
 
-  <!-- ─── Twitter Card ────────────────────────────────────────────── -->
-  <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="Aaron Dela Cruz · Developer" />
-  <meta name="twitter:description" content="Frontend & Backend Developer — building fast, beautiful digital experiences." />
-  <meta name="twitter:image"       content="assets/images/og-image.png" />
 
   <!-- ─── Favicon ─────────────────────────────────────────────────── -->
   <link rel="icon"             type="image/svg+xml"  href="assets/icons/favicon.svg" />
-  <link rel="icon"             type="image/png"      href="assets/icons/favicon-32.png" sizes="32x32" />
-  <link rel="apple-touch-icon"                       href="assets/icons/apple-touch-icon.png" />
   <link rel="manifest"                               href="assets/icons/site.webmanifest" />
   <meta name="theme-color"    content="#050810" />
 
   <title>Aaron Dela Cruz · Developer</title>
 
-  <!-- ─── Fonts (preconnect first, then load) ──────────────────────── -->
+  <!-- ─── Fonts ────────────────────────────────────────────────────── -->
+  <!-- Fonts are loaded via @import in css/base.css §0 FONTS.           -->
+  <!-- To change fonts, edit only that section — no changes needed here. -->
+  <!-- Preconnect hints keep the @import fast by opening the connection  -->
+  <!-- to Google's servers before the browser parses the CSS file.       -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet" />
 
   <!-- ─── Icons ────────────────────────────────────────────────────── -->
-  <link rel="stylesheet"
+  <link rel="preload"
+        as="style"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer"
+        onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </noscript>
+
+  <script>
+    window.setTimeout(() => {
+      const reveal = () => document.body?.classList.add('loaded');
+      if (document.body) reveal();
+      else document.addEventListener('DOMContentLoaded', reveal, { once: true });
+    }, 2200);
+  </script>
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="libs/gsap.min.js"></script>
+  <script src="libs/ScrollTrigger.min.js"></script>
+
+  <!-- Three.js + loaders -->
+  <script src="libs/three.min.js" defer></script>
+  <script src="libs/OBJLoader.js" defer></script>
 
   <!-- ─── Stylesheets ──────────────────────────────────────────────── -->
   <link rel="stylesheet" href="css/base.css" />
@@ -52,10 +71,13 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <!-- ═══════════════════════════════════════════════
-      PRELOADER
-  ═══════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════
+      §0  PRELOADER
+      Shown until body.loaded is added (js/main.js: DOMContentLoaded).
+      Edit: preloader-text string below.
+      ═══════════════════════════════════════════════════════════════════ -->
   <div class="preloader" role="status" aria-label="Loading">
     <div class="preloader-inner">
       <div class="preloader-ring"></div>
@@ -68,66 +90,44 @@
   ═══════════════════════════════════════════════ -->
   <div class="bg-gradient"  aria-hidden="true"></div>
 
-  <div class="space-layer"  aria-hidden="true">
-    <canvas id="particle-canvas"></canvas>
-    <canvas id="globe-trail"></canvas>
-    <div class="nebula nebula-1"></div>
-    <div class="nebula nebula-2"></div>
-    <div class="nebula nebula-3"></div>
-    <div class="shooting-star"></div>
-    <div class="shooting-star"></div>
-    <div class="shooting-star"></div>
+  <!-- Space background canvas (milky way + nebulae + stars + shooting stars) -->
+  <canvas id="space-canvas" class="space-canvas" aria-hidden="true"></canvas>
+
+
+
+  <!-- Satellite: fixed canvas moved by satellite.js via GSAP -->
+  <canvas id="sat-canvas" class="sat-canvas-fixed" aria-hidden="true"></canvas>
+  <div class="sat-loader" id="sat-loader" aria-hidden="true">
+    <div class="sat-loader-ring"></div>
+    <span>Loading satellite...</span>
   </div>
 
-  <!-- Globe — static CSS, never moved by JS -->
-  <div id="space-globe" aria-hidden="true">
-    <div class="globe-body">
-      <div class="globe-grid"></div>
-    </div>
-    <div class="globe-ring"></div>
-    <div class="globe-atmosphere"></div>
-  </div>
-
-  <!-- Satellite — scroll-driven by animation.js -->
-  <div id="space-satellite" aria-hidden="true">
-    <div class="satellite-body">
-      <div class="sat-truss"></div>
-      <div class="sat-boom sat-boom-left"></div>
-      <div class="sat-boom sat-boom-right"></div>
-      <div class="sat-solar sat-solar-l1"></div>
-      <div class="sat-solar sat-solar-l2"></div>
-      <div class="sat-solar sat-solar-r1"></div>
-      <div class="sat-solar sat-solar-r2"></div>
-      <div class="sat-modules">
-        <div class="sat-mod-c"></div>
-        <div class="sat-mod-b"></div>
-        <div class="sat-mod-foil"></div>
-        <div class="sat-mod-main"></div>
-        <div class="sat-mod-b"></div>
-      </div>
-      <div class="sat-radiator"></div>
-      <div class="sat-dish"></div>
-      <div class="sat-signal"></div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════
-      NAVIGATION
-  ═══════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════
+      §1  NAVIGATION
+      Edit: nav-logo text, nav-links hrefs and labels,
+            add/remove nav items here (also update scroll.js registerSections)
+      ═══════════════════════════════════════════════════════════════════ -->
   <header class="nav" id="main-nav" role="banner">
     <div class="nav-inner">
       <a href="#hero" class="nav-logo" aria-label="Aaron Dela Cruz — home">
-        <div class="nav-logo-dot"></div>
-        Aaron<span style="color:var(--clr-accent)">.</span>dev
+        <img
+          src="assets/img/logo-img.png"
+          alt=""
+          class="nav-logo-img"
+          width="48"
+          height="48"
+          decoding="async"
+        />
+        <span class="nav-logo-text">AaronDC<span class="nav-logo-accent">.</span>dev</span>
       </a>
 
       <nav class="nav-links" id="nav-links" role="navigation" aria-label="Primary navigation">
-        <a href="#hero"     class="active">Home</a>
-        <a href="#about"             >About</a>
-        <a href="#skills"            >Skills</a>
-        <a href="#certifications"    >Certifications</a>
-        <a href="#projects"          >Projects</a>
-        <a href="#contact"           >Contact</a>
+        <a href="#hero"          class="active">Home</a>
+        <a href="#about"                       >About</a>
+        <a href="#skills"                      >Skills</a>
+        <a href="#certifications"              >Certs</a>
+        <a href="#projects"                    >Projects</a>
+        <a href="#contact"                     >Contact</a>
       </nav>
 
       <button class="nav-toggle"
@@ -140,75 +140,124 @@
     </div>
   </header>
 
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
-  <!-- ═══════════════════════════════════════════════
-      HERO
-  ═══════════════════════════════════════════════ -->
+  <main id="main-content">
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+      §2  HERO SECTION
+      Edit: hero-eyebrow text, hero-title lines, hero-desc paragraph,
+            hero-cta buttons, hero-strip stats (num + label),
+            hero-badge text (badges are decorative, hidden on mobile),
+            hero-card (the mini profile card on the right)
+      ═══════════════════════════════════════════════════════════════════ -->
   <section id="hero" aria-labelledby="hero-heading">
-    <div class="container">
-      <div class="hero-inner">
+    <div class="hero-ambient" aria-hidden="true">
+      <span class="hero-ambient-ring hero-ambient-ring--wide"></span>
+      <span class="hero-ambient-ring hero-ambient-ring--tight"></span>
+      <span class="hero-ambient-arc hero-ambient-arc--one"></span>
+      <span class="hero-ambient-arc hero-ambient-arc--two"></span>
+      <span class="hero-ambient-drift"></span>
+    </div>
 
-        <div class="hero-content">
-          <div class="hero-eyebrow">
-            <span class="hero-eyebrow-dot"></span>
-            Available for work
-          </div>
+    <!-- Geometric grid overlay (decorative) -->
+    <div class="hero-grid-overlay" aria-hidden="true">
+      <div class="hero-grid-cell"></div>
+      <div class="hero-grid-cell"></div>
+      <div class="hero-grid-cell"></div>
+      <div class="hero-grid-cell"></div>
+      <div class="hero-grid-cell"></div>
+      <div class="hero-grid-cell"></div>
+    </div>
 
-          <h1 class="hero-title" id="hero-heading">
-            <span class="hero-title-line">Hello, I'm</span>
-            <span class="hero-title-line hero-title-accent">Aaron</span>
-            <span class="hero-title-line">Dela Cruz</span>
-          </h1>
+    <!-- Floating spec badges (like VYRE product callouts) -->
+    <div class="hero-badge hero-badge--1" aria-hidden="true">
+      <span class="hero-badge-dot"></span>
+      Full-Stack Capable
+    </div>
+    <div class="hero-badge hero-badge--2" aria-hidden="true">
+      <span class="hero-badge-dot"></span>
+      Precision UI Craft
+    </div>
+    <div class="hero-badge hero-badge--3" aria-hidden="true">
+      <span class="hero-badge-dot"></span>
+      API-First Architecture
+    </div>
+    <div class="hero-badge hero-badge--4" aria-hidden="true">
+      <span class="hero-badge-dot"></span>
+      Performance Rated 95+
+    </div>
 
-          <p class="hero-role">
-            <span class="typing-text"></span>
-            <span class="typing-cursor" aria-hidden="true"></span>
-          </p>
 
-          <p class="hero-desc">
-            I craft fast, beautiful, and accessible digital experiences —
-            from pixel-perfect interfaces to robust back-end systems.
-            Based in Mabalacat City, PH.
-          </p>
+    <!-- Bottom-left: main text content -->
+    <div class="hero-content" aria-label="Hero content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Available for work
+      </div>
 
-          <div class="hero-cta">
-            <a href="#projects" class="btn btn-primary">
-              <i class="fas fa-rocket"   aria-hidden="true"></i> View Projects
-            </a>
-            <a href="#contact"  class="btn btn-ghost">
-              <i class="fas fa-envelope" aria-hidden="true"></i> Get in Touch
-            </a>
-          </div>
+      <h1 class="hero-title" id="hero-heading">
+        <span class="hero-title-line">Advanced</span>
+        <span class="hero-title-line hero-title-accent">Full-Stack</span>
+        <span class="hero-title-line">Development.</span>
+        <span class="hero-title-line hero-title-sub">Built to perform.</span>
+      </h1>
 
-          <div class="hero-stats" aria-label="Quick stats">
-            <div class="hero-stat">
-              <div class="hero-stat-num">1+</div>
-              <div class="hero-stat-label">Years Exp.</div>
-            </div>
-            <div class="hero-stat-sep" aria-hidden="true"></div>
-            <div class="hero-stat">
-              <div class="hero-stat-num">5+</div>
-              <div class="hero-stat-label">Projects</div>
-            </div>
-            <div class="hero-stat-sep" aria-hidden="true"></div>
-            <div class="hero-stat">
-              <div class="hero-stat-num">10+</div>
-              <div class="hero-stat-label">Tech Stack</div>
-            </div>
-          </div>
-        </div>
+      <p class="hero-desc">
+        I craft fast, beautiful, and accessible digital experiences —
+        from pixel-perfect interfaces to robust back-end systems.
+        Based in Mabalacat City, PH.
+      </p>
 
-        <div class="hero-visual" aria-hidden="true">
-          <div class="hero-avatar-wrap">
-            <div class="hero-avatar-ring"></div>
-            <div class="hero-avatar-ring hero-avatar-ring-2"></div>
-            <div class="hero-avatar">🧑🏻‍💻</div>
-          </div>
-        </div>
-
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">
+          <i class="fas fa-location-arrow" aria-hidden="true"></i> View Projects
+        </a>
+        <a href="#about" class="hero-explore-link">
+          <i class="fas fa-circle" aria-hidden="true"></i> Explore Work
+        </a>
       </div>
     </div>
 
+    <!-- Bottom strip: stats + typing role -->
+    <div class="hero-strip" aria-label="Quick stats">
+      <div class="hero-strip-role">
+        <span class="typing-text"></span>
+        <span class="typing-cursor" aria-hidden="true"></span>
+      </div>
+      <div class="hero-strip-divider" aria-hidden="true"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">3+</div>
+        <div class="hero-stat-label">Years Exp.</div>
+      </div>
+      <div class="hero-strip-divider" aria-hidden="true"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">5+</div>
+        <div class="hero-stat-label">Projects Done</div>
+      </div>
+      <div class="hero-strip-divider" aria-hidden="true"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">10+</div>
+        <div class="hero-stat-label">Tech Stack</div>
+      </div>
+      <div class="hero-strip-divider" aria-hidden="true"></div>
+    </div>
+
+    <!-- Bottom-right: mini profile card (like VYRE product card) -->
+    <div class="hero-card" aria-label="Profile summary">
+      <div class="hero-card-img" aria-hidden="true">
+        <i class="fas fa-code"></i>
+      </div>
+      <div class="hero-card-body">
+        <div class="hero-card-name">Aaron Dela Cruz</div>
+        <div class="hero-card-role">Full-Stack Developer</div>
+        <a href="#contact" class="hero-card-btn">
+          Hire Me <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
     <div class="scroll-hint" aria-hidden="true">
       <div class="scroll-hint-line"></div>
       <span>scroll</span>
@@ -222,73 +271,115 @@
   <section id="about" aria-labelledby="about-heading">
     <div class="container">
       <div class="section-inner">
-        <div class="about-grid">
+        <div class="about-grid about-grid-premium">
 
           <!-- Image card -->
-          <div class="about-img-wrap reveal reveal-left">
-            <div class="about-img-card" role="img" aria-label="Aaron Dela Cruz illustration">
-              <img src="/assets/img/ProfilePicture.png" alt="Profile Picture">
-              <div class="about-img-badge">
-                <div class="about-img-badge-num">3+</div>
-                <div class="about-img-badge-label">Years Coding</div>
+          <div class="about-img-wrap about-orbit reveal reveal-left">
+            <div class="about-img-card about-orbit-card" role="group" aria-label="Developer profile photo with orbiting skill markers">
+              <div class="about-orbit-rings" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
               </div>
+              <div class="about-orbit-avatar about-photo-frame">
+                <img
+                  src="assets/img/profile-img.png"
+                  alt="Portrait of Aaron Dela Cruz"
+                  class="about-profile-photo"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="about-orbit-node about-orbit-node-one">
+                <span>UI</span>
+                <small>interfaces</small>
+              </div>
+              <div class="about-orbit-node about-orbit-node-two">
+                <span>API</span>
+                <small>systems</small>
+              </div>
+              <div class="about-orbit-node about-orbit-node-three">
+                <span>60</span>
+                <small>fps target</small>
+              </div>
+            </div>
+            <div class="about-signal-card">
+              <div>
+                <span class="about-signal-label">Current trajectory</span>
+                <strong>Full-stack developer focused on polished web experiences.</strong>
+              </div>
+              <i class="fas fa-location-arrow" aria-hidden="true"></i>
             </div>
           </div>
 
           <!-- Text content -->
-          <div class="about-content reveal reveal-right">
+          <div class="about-content about-content-premium reveal reveal-right">
             <div class="section-label">About Me</div>
-            <h2 class="section-title" id="about-heading" style="margin-bottom:1.5rem">
-              Turning ideas into<br>
-              <span class="gradient-text">reality</span>
+            <h2 class="section-title section-title-spaced" id="about-heading">
+              I build interfaces with<br>
+              <span class="gradient-text">engineering discipline.</span>
             </h2>
 
-            <p class="about-text">
-              I'm a passionate full-stack developer who loves building seamless digital
-              experiences. My journey started with curiosity about how things work on
-              the web, and it evolved into a deep love for clean code, elegant design,
-              and solving real-world problems.
-            </p>
-            <p class="about-text">
-              I specialise in modern JavaScript ecosystems — both on the frontend and
-              backend. When I'm not coding, I enjoy exploring new technologies, gaming,
-              and contributing to open-source projects.
+            <div class="about-copy-stack">
+              <p class="about-text about-lede">
+                I am Aaron Dela Cruz, a full-stack developer in Mabalacat City who enjoys turning rough product ideas into clear, fast, usable web experiences.
+              </p>
+              <p class="about-text">
+                My work sits between frontend craft and backend structure: readable interfaces, reliable APIs, responsive layouts, and the small interaction details that make a portfolio, dashboard, or product feel finished.
             </p>
 
-            <div class="about-highlights">
+            </div>
+
+            <div class="about-metrics" aria-label="Developer profile metrics">
+              <div class="about-metric reveal-child">
+                <span>03+</span>
+                <small>years coding</small>
+              </div>
+              <div class="about-metric reveal-child">
+                <span>05+</span>
+                <small>projects shipped</small>
+              </div>
+              <div class="about-metric reveal-child">
+                <span>10+</span>
+                <small>tools used</small>
+              </div>
+            </div>
+
+            <div class="about-highlights about-highlights-premium">
               <div class="about-highlight-item reveal-child">
-                <div class="about-highlight-icon" aria-hidden="true">⚡</div>
+                <div class="about-highlight-icon" aria-hidden="true"><i class="fas fa-bolt"></i></div>
                 <div>
-                  <div class="about-highlight-title">Fast Learner</div>
-                  <div class="about-highlight-desc">Adapts quickly to new tech</div>
+                  <div class="about-highlight-title">Fast learning loop</div>
+                  <div class="about-highlight-desc">Turns unfamiliar requirements into working systems quickly.</div>
                 </div>
               </div>
               <div class="about-highlight-item reveal-child">
-                <div class="about-highlight-icon" aria-hidden="true">🎨</div>
+                <div class="about-highlight-icon" aria-hidden="true"><i class="fas fa-pen-nib"></i></div>
                 <div>
-                  <div class="about-highlight-title">Design-Minded</div>
-                  <div class="about-highlight-desc">Strong eye for UI/UX</div>
+                  <div class="about-highlight-title">Design-aware frontend</div>
+                  <div class="about-highlight-desc">Balances hierarchy, motion, accessibility, and responsive behavior.</div>
                 </div>
               </div>
               <div class="about-highlight-item reveal-child">
-                <div class="about-highlight-icon" aria-hidden="true">🔧</div>
+                <div class="about-highlight-icon" aria-hidden="true"><i class="fas fa-screwdriver-wrench"></i></div>
                 <div>
-                  <div class="about-highlight-title">Problem Solver</div>
-                  <div class="about-highlight-desc">Tackles complex challenges</div>
+                  <div class="about-highlight-title">Systems mindset</div>
+                  <div class="about-highlight-desc">Keeps code organized so features can grow without becoming fragile.</div>
                 </div>
               </div>
               <div class="about-highlight-item reveal-child">
-                <div class="about-highlight-icon" aria-hidden="true">🤝</div>
+                <div class="about-highlight-icon" aria-hidden="true"><i class="fas fa-handshake-angle"></i></div>
                 <div>
-                  <div class="about-highlight-title">Team Player</div>
-                  <div class="about-highlight-desc">Collaborates in agile teams</div>
+                  <div class="about-highlight-title">Team-ready habits</div>
+                  <div class="about-highlight-desc">Communicates clearly, documents decisions, and works well in agile teams.</div>
                 </div>
               </div>
             </div>
 
-            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-              <a href="assets/Aaron-Dela-Cruz-CV.pdf" download class="btn btn-primary">
-                <i class="fas fa-download" aria-hidden="true"></i> Download CV
+            <div class="about-actions">
+              <a href="assets/Aaron_Dela-Cruz_CV.pdf" download class="btn btn-primary about-primary-action">
+                <span>Download CV</span>
+                <span class="btn-icon-island"><i class="fas fa-download" aria-hidden="true"></i></span>
               </a>
               <a href="#projects" class="btn btn-ghost">
                 <i class="fas fa-folder-open" aria-hidden="true"></i> My Work
@@ -309,215 +400,201 @@
     <div class="container">
       <div class="section-inner">
 
-        <div class="reveal" style="text-align:center;margin-bottom:1rem">
-          <div class="section-label" style="justify-content:center">My Tech Stack</div>
+        <div class="section-head section-head-center reveal">
+          <div class="section-label">My Tech Stack</div>
           <h2 class="section-title" id="skills-heading">
-            Tools I <span class="gradient-text">master</span>
+            Technical systems I <span class="gradient-text">ship with.</span>
           </h2>
+          <p class="section-kicker">
+            Frontend craft, backend logic, and deployment habits organized around fast, maintainable product work.
+          </p>
         </div>
 
-        <div class="skills-grid">
-
-          <!-- Frontend -->
-          <div class="skill-category reveal">
-            <div class="skill-cat-header">
-              <div class="skill-cat-icon">
-                <i class="fas fa-palette" aria-hidden="true" style="color:#fff"></i>
-              </div>
-              <div class="skill-cat-name">Frontend</div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>HTML / CSS</span><span>95%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="95"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>JavaScript (ES6+)</span><span>90%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="90"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>TypeScript</span><span>80%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>React / Vue</span><span>75%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="75"></div></div>
-            </div>
-            <div class="skill-icons">
-              <div class="skill-icon"><i class="fab fa-html5    tech-html"  aria-hidden="true"></i><span>HTML5</span></div>
-              <div class="skill-icon"><i class="fab fa-css3-alt tech-css"   aria-hidden="true"></i><span>CSS3</span></div>
-              <div class="skill-icon"><i class="fab fa-js-square tech-js"   aria-hidden="true"></i><span>JS</span></div>
-              <div class="skill-icon"><i class="fab fa-react    tech-react" aria-hidden="true"></i><span>React</span></div>
-            </div>
+        <div class="skills-belt reveal" aria-label="Autoplaying skills carousel">
+          <div class="skills-grid skills-grid-premium skills-belt-track" id="skills-belt-track">
+            <span class="skill-belt-item">HTML / CSS</span>
+            <span class="skill-belt-item">JavaScript ES6+</span>
+            <span class="skill-belt-item">Java</span>
+            <span class="skill-belt-item">React</span>
+            <span class="skill-belt-item">Kotlin</span>
+            <span class="skill-belt-item">Node.js</span>
+            <span class="skill-belt-item">MariaDB</span>
+            <span class="skill-belt-item">Python</span>
+            <span class="skill-belt-item">PHP / Laravel</span>
+            <span class="skill-belt-item">MySQL</span>
+            <span class="skill-belt-item">MongoDB</span>
+            <span class="skill-belt-item">Git / GitHub</span>
           </div>
-
-          <!-- Backend -->
-          <div class="skill-category reveal">
-            <div class="skill-cat-header">
-              <div class="skill-cat-icon" style="background:linear-gradient(135deg,var(--clr-accent-2),var(--clr-accent-3))">
-                <i class="fas fa-server" aria-hidden="true" style="color:#fff"></i>
-              </div>
-              <div class="skill-cat-name">Backend</div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Kotlin</span><span>85%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="85"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Java</span><span>95%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="75"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Fire Base</span><span>85%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="70"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>MySQL / MariaDB</span><span>80%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-icons">
-              <div class="skill-icon"><i class="fa-solid fa-mobile" aria-hidden="true"></i><span>Kotlin</span></div>
-              <div class="skill-icon"><i class="fa-brands fa-java"  aria-hidden="true"></i><span>Java</span></div>
-              <div class="skill-icon"><i class="fa-solid fa-code-merge" aria-hidden="true"></i><span>Firebase</span></div>
-              <div class="skill-icon"><i class="fas fa-database tech-db"   aria-hidden="true"></i><span>MySQL</span></div>
-            </div>
-          </div>
-
-          <!-- Tools -->
-          <div class="skill-category reveal">
-            <div class="skill-cat-header">
-              <div class="skill-cat-icon" style="background:linear-gradient(135deg,#f05032,#e8a020)">
-                <i class="fas fa-tools" aria-hidden="true" style="color:#fff"></i>
-              </div>
-              <div class="skill-cat-name">Tools &amp; DevOps</div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Git / GitHub</span><span>90%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="90"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Docker</span><span>65%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="65"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>Linux / CLI</span><span>80%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-wrap">
-              <div class="skill-bar-label"><span>REST APIs</span><span>88%</span></div>
-              <div class="skill-bar-track"><div class="skill-fill" data-width="88"></div></div>
-            </div>
-            <div class="skill-icons">
-              <div class="skill-icon"><i class="fab fa-git-alt  tech-git"    aria-hidden="true"></i><span>Git</span></div>
-              <div class="skill-icon"><i class="fab fa-docker   tech-docker" aria-hidden="true"></i><span>Docker</span></div>
-              <div class="skill-icon"><i class="fab fa-linux"   style="color:#ffd133" aria-hidden="true"></i><span>Linux</span></div>
-              <div class="skill-icon"><i class="fas fa-cloud"   style="color:#6ca0dc" aria-hidden="true"></i><span>Cloud</span></div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
   </section>
+
 
 
   <!-- ═══════════════════════════════════════════════
       CERTIFICATIONS
   ═══════════════════════════════════════════════ -->
-  <section id="certifications" aria-labelledby="certifications-heading">
+  <section id="certifications" aria-labelledby="cert-heading">
     <div class="container">
       <div class="section-inner">
 
-        <div class="reveal" style="text-align:center;margin-bottom:1rem">
-          <div class="section-label" style="justify-content:center">Verified Skills</div>
-          <h2 class="section-title" id="certifications-heading">
-            Professional <span class="gradient-text">certifications</span>
+        <div class="section-head section-head-center reveal">
+          <div class="section-label">Credentials</div>
+          <h2 class="section-title" id="cert-heading">
+            Certifications &amp; <span class="gradient-text">Achievements</span>
           </h2>
+          <p class="section-kicker">
+            Verified paths across programming, IT foundations, databases, analytics, and professional productivity.
+          </p>
         </div>
 
-        <div class="cert-grid">
+        <!--
+          Scroll-driven stacking gallery.
+          GSAP pins this wrapper and scrubs the stack animation.
+          Each .cert-stack-card slides up and stacks on top as you scroll.
+          See js/animation.js → initCertGallery()
+        -->
+        <div class="cert-stack-scene" id="cert-gallery" aria-label="Scroll-driven certification gallery">
+          <div class="cert-stack-inner">
 
-          <article class="cert-card reveal">
-            <div class="cert-card-top">
-              <div class="cert-logo" aria-hidden="true"><i class="fas fa-award"></i></div>
-              <div class="cert-label">Database Administration</div>
-            </div>
-            <div>
-              <h3 class="cert-title">IT Specialist - Database</h3>
-              <p class="cert-desc">Demonstrates a technical mastery of relational database systems. This includes proficiency in designing efficient data structures, managing database security, and writing complex SQL queries to extract and manipulate data for business intelligence.</p>
-            </div>
-            <div class="cert-footer">
-              <span class="cert-badge">Issued by Certiport</span>
-              <a href="https://www.credly.com/badges/73afb068-4de2-4f17-a7f5-192c14a73380/public_url" class="cert-link" target="_blank">View credential</a>
-            </div>
-          </article>
+            <article class="cert-stack-card">
+              <div class="cert-card-surface">
+                <figure class="cert-media">
+                  <img src="assets/certificates/cisco-python-essentials.svg"
+                      alt="Cisco Networking Academy Python Essentials certificate preview"
+                      loading="lazy" decoding="async">
+                </figure>
+                <div class="cert-body">
+                <div class="cert-meta">
+                  <span class="cert-issuer">Cisco</span>
+                  <span class="cert-date">2026</span>
+                </div>
+                <h3 class="cert-name">Python Essentials 1</h3>
+                <p class="cert-desc">
+                  Built core Python fluency through variables, control flow, functions, collections, debugging, and hands-on programming labs.
+                </p>
+                <div class="cert-topics" aria-label="Topics covered">
+                  <span>Python</span><span>Programming</span><span>Debugging</span>
+                </div>
+                <a class="cert-link" href="https://www.credly.com/badges/5b87181d-529d-4b36-8879-06582ecbc05f/public_url" target="_blank" rel="noopener noreferrer">
+                  View Certificate <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+                </div>
+              </div>
+            </article>
 
-          <article class="cert-card reveal">
-            <div class="cert-card-top">
-              <div class="cert-logo" aria-hidden="true"><i class="fas fa-code"></i></div>
-              <div class="cert-label">IT Concepts</div>
-            </div>
-            <div>
-              <h3 class="cert-title">Comptia IT Fundementals (ITF+)</h3>
-              <p class="cert-desc">A professional-standard certification validating a broad understanding of the IT landscape. It covers critical areas including system hardware, software troubleshooting, networking infrastructure, and the essential security practices required in a modern tech environment.</p>
-            </div>
-            <div class="cert-footer">
-              <span class="cert-badge">Issued by CompTIA</span>
-              <a href="https://www.credly.com/badges/d02a66e7-5a88-4321-a5aa-5a8412f16953/public_url" class="cert-link" target="_blank">View credential</a>
-            </div>
-          </article>
+            <article class="cert-stack-card">
+              <div class="cert-card-surface">
+                <figure class="cert-media">
+                  <img src="assets/certificates/comptia-ITF+.svg"
+                      alt="CompTIA IT Fundamentals ITF+ certificate preview"
+                      loading="lazy" decoding="async">
+                </figure>
+                <div class="cert-body">
+                <div class="cert-meta">
+                  <span class="cert-issuer">CompTIA</span>
+                  <span class="cert-date">2025</span>
+                </div>
+                <h3 class="cert-name">IT Fundamentals (ITF+)</h3>
+                <p class="cert-desc">
+                  Validated baseline IT knowledge across hardware, infrastructure, applications, software development, databases, and security.
+                </p>
+                <div class="cert-topics" aria-label="Topics covered">
+                  <span>IT Concepts</span><span>Infrastructure</span><span>Security</span>
+                </div>
+                <a class="cert-link" href="https://www.credly.com/badges/d02a66e7-5a88-4321-a5aa-5a8412f16953/public_url" target="_blank" rel="noopener noreferrer">
+                  View Certificate <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+                </div>
+              </div>
+            </article>
 
-          <article class="cert-card reveal">
-            <div class="cert-card-top">
-              <div class="cert-logo" aria-hidden="true"><i class="fas fa-graduation-cap"></i></div>
-              <div class="cert-label">Charts &amp; Tables</div>
-            </div>
-            <div>
-              <h3 class="cert-title">MOS: Excel Associate (365 Apps)</h3>
-              <p class="cert-desc">Certifies expert-level proficiency in Microsoft Excel 365 for data analysis and reporting. This involves advanced formula construction, the creation of dynamic data visualizations, and the ability to manage large datasets to drive informed decision-making.</p>
-            </div>
-            <div class="cert-footer">
-              <span class="cert-badge">Issued by Microsoft</span>
-              <a href="https://www.credly.com/badges/ace2c641-3c89-4e62-bafa-2e509152cf95/public_url" class="cert-link" target="_blank">View credential</a>
-            </div>
-          </article>
+            <article class="cert-stack-card">
+              <div class="cert-card-surface">
+                <figure class="cert-media">
+                  <img src="assets/certificates/pearson-databases.svg"
+                      alt="Pearson IT Specialist Databases certificate preview"
+                      loading="lazy" decoding="async">
+                </figure>
+                <div class="cert-body">
+                <div class="cert-meta">
+                  <span class="cert-issuer">Pearson</span>
+                  <span class="cert-date">2026</span>
+                </div>
+                <h3 class="cert-name">IT Specialist: Databases</h3>
+                <p class="cert-desc">
+                  Demonstrated introductory database design, relational modeling, ANSI SQL querying, object management, and troubleshooting fundamentals.
+                </p>
+                <div class="cert-topics" aria-label="Topics covered">
+                  <span>SQL</span><span>Relational Design</span><span>Data Modeling</span>
+                </div>
+                <a class="cert-link" href="https://www.credly.com/badges/73afb068-4de2-4f17-a7f5-192c14a73380/public_url" target="_blank" rel="noopener noreferrer">
+                  View Certificate <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+                </div>
+              </div>
+            </article>
 
-            <article class="cert-card reveal">
-            <div class="cert-card-top">
-              <div class="cert-logo" aria-hidden="true"><i class="fas fa-graduation-cap"></i></div>
-              <div class="cert-label">Charts &amp; Tables</div>
-            </div>
-            <div>
-              <h3 class="cert-title">MOS: Excel Associate (Office 2019)</h3>
-              <p class="cert-desc">Certifies expert-level proficiency in Microsoft Excel 2019 for data analysis and reporting. This involves advanced formula construction, the creation of dynamic data visualizations, and the ability to manage large datasets to drive informed decision-making.</p>
-            </div>
-            <div class="cert-footer">
-              <span class="cert-badge">Issued by Microsoft</span>
-              <a href="https://www.credly.com/badges/c090cf44-7d08-4174-8b83-d565dc8d9fae/public_url" class="cert-link" target="_blank">View credential</a>
-            </div>
-          </article>
+            <article class="cert-stack-card">
+              <div class="cert-card-surface">
+                <figure class="cert-media">
+                  <img src="assets/certificates/excel-office-2019.svg"
+                      alt="Microsoft Office Specialist Excel Associate certificate preview"
+                      loading="lazy" decoding="async">
+                </figure>
+                <div class="cert-body">
+                <div class="cert-meta">
+                  <span class="cert-issuer">Microsoft</span>
+                  <span class="cert-date">2026</span>
+                </div>
+                <h3 class="cert-name">Microsoft Office Specialist: Excel Associate</h3>
+                <p class="cert-desc">
+                  Validated Excel skills across formulas, data analysis, charts, workbook management, and professional spreadsheet workflows.
+                </p>
+                <div class="cert-topics" aria-label="Topics covered">
+                  <span>Excel</span><span>Formulas</span><span>Data Analysis</span>
+                </div>
+                <a class="cert-link" href="https://www.credly.com/badges/c090cf44-7d08-4174-8b83-d565dc8d9fae/public_url" target="_blank" rel="noopener noreferrer">
+                  View Certificate <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+                </div>
+              </div>
+            </article>
 
-          <article class="cert-card reveal">
-            <div class="cert-card-top">
-              <div class="cert-logo" aria-hidden="true"><i class="fas fa-graduation-cap"></i></div>
-              <div class="cert-label">Programming Basics</div>
-            </div>
-            <div>
-              <h3 class="cert-title">Cisco Python Essentials 1</h3>
-              <p class="cert-desc">Verifies a strong foundation in Python, one of the world's most versatile programming languages. It covers the complete development lifecycle—from writing clean, logical code and managing data structures to implementing complex algorithmic solutions.</p>
-            </div>
-            <div class="cert-footer">
-              <span class="cert-badge">Issued by Cisco</span>
-              <a href="https://www.credly.com/badges/5b87181d-529d-4b36-8879-06582ecbc05f/public_url" class="cert-link" target="_blank">View credential</a>
-            </div>
-          </article>
+            <article class="cert-stack-card">
+              <div class="cert-card-surface">
+                <figure class="cert-media">
+                  <img src="assets/certificates/excel-office-365.svg"
+                      alt="Microsoft Office Specialist Excel Associate certificate preview"
+                      loading="lazy" decoding="async">
+                </figure>
+                <div class="cert-body">
+                <div class="cert-meta">
+                  <span class="cert-issuer">Microsoft</span>
+                  <span class="cert-date">2026</span>
+                </div>
+                <h3 class="cert-name">Microsoft Office Specialist: Excel Associate</h3>
+                <p class="cert-desc">
+                  Validated Excel skills across formulas, data analysis, charts, workbook management, and professional spreadsheet workflows.
+                </p>
+                <div class="cert-topics" aria-label="Topics covered">
+                  <span>Excel</span><span>Formulas</span><span>Data Analysis</span>
+                </div>
+                <a class="cert-link" href="https://www.credly.com/badges/ace2c641-3c89-4e62-bafa-2e509152cf95/public_url" target="_blank" rel="noopener noreferrer">
+                  View Certificate <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+                </div>
+              </div>
+            </article>
 
-          
+          </div><!-- /.cert-stack-inner -->
 
-        </div>
+        </div><!-- /.cert-stack-scene -->
+
       </div>
     </div>
   </section>
-
 
   <!-- ═══════════════════════════════════════════════
       PROJECTS
@@ -540,51 +617,192 @@
           </a>
         </div>
 
-        <div class="reveal">
-          <div class="projects-track" id="projects-track"
-              role="region" aria-label="Projects carousel"
-              aria-live="polite">
+        <div class="projects-cinematic-stage project-holo-stage reveal"
+            id="projects-dock"
+            data-active-project="0"
+            aria-label="Scroll-driven holographic project selector">
+          <span class="project-holo-stage-scan" aria-hidden="true"></span>
 
-            <!-- Project 1 -->
-            <article class="project-card">
-              <div class="project-img" style="background:linear-gradient(135deg,#0d2040,#1a4a7a)" role="img" aria-label="Space Portfolio preview">
-                <span class="project-num">01 / 01</span>
-                <img src="/assets/img/NuSpot.png" alt="🔎" style="background-size: cover;">
-              </div>
-              <div class="project-info">
-                <div>
-                  <div class="project-meta">
-                    <span class="tag">Mobile App</span>
-                    <span class="tag">Full Stack</span>
-                  </div>
-                  <h3 class="project-title">NU SPOT | Lost & Found System</h3>
-                  <p class="project-desc">
-                    A mobile application made for NU Clark students to easily track lost items. Complete with authentication, Searchable items, Upload images, Personal accounts and many more.  This is a prototype and not yet suitable for public use.
-                  </p>
-                  <div class="project-tech">
-                    <span class="tag">Kotlin</span>
-                    <span class="tag">Firebase</span>
-                    <span class="tag">XML</span>
-                  </div>
+          <!-- Projects left console -->
+          <div class="project-holo-console">
+            <div class="project-holo-console-head" aria-hidden="true">
+              <span>Project Core</span>
+              <span data-holo-status>Online</span>
+            </div>
+
+            <div class="project-holo-panels" id="projects-grid" aria-live="polite">
+              <article class="project-holo-panel is-active"
+                      data-project-card
+                      data-holo-color="#2df8ff"
+                      data-holo-accent="#00d4aa"
+                      data-holo-icon="fas fa-globe"
+                      data-holo-label-a="Playful Portfolio"
+                      data-holo-label-b="Bouncy Motion"
+                      data-holo-label-c="CSS Comic">
+                <p class="project-holo-kicker"><span>01 / 04</span> Neo-brutalism Design</p>
+                <h3 class="project-holo-title">Portfolio Template</h3>
+                <p class="project-holo-desc">
+                  A Neo-Brutalism personal portfolio template with scroll-driven motion, bold borders, hard shadows, oversized typography, playful motion, and accessible interaction states.
+                </p>
+                <dl class="project-holo-metadata">
+                  <div><dt>Mode</dt><dd>Web App</dd></div>
+                  <div><dt>Signal</dt><dd>Full Stack</dd></div>
+                  <div><dt>Status</dt><dd>Live Shell</dd></div>
+                </dl>
+                <div class="project-holo-tech" aria-label="Technology stack">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JavaScript</span>
                 </div>
-                <div class="project-actions">
-                  <a href="https://github.com/ron-cd/LostAndFound" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">
-                    <i class="fab fa-github" aria-hidden="true"></i> Source
+                <div class="project-holo-actions">
+                  <a href="https://ron-cd.github.io/Neo-Brutalism-Sample/" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                    <i class="fas fa-globe" aria-hidden="true"></i> Live Demo
+                  </a>
+                  <a href="https://github.com/ron-cd/Neo-Brutalism-Sample" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">
+                    <i class="fab fa-github" aria-hidden="true"></i> GitHub
                   </a>
                 </div>
+              </article>
+
+              <article class="project-holo-panel"
+                      data-project-card
+                      data-holo-color="#52ff9d"
+                      data-holo-accent="#8cffd2"
+                      data-holo-icon="fas fa-bag-shopping"
+                      data-holo-label-a="Client "
+                      data-holo-label-b="Artistic"
+                      data-holo-label-c="Rustic">
+                <p class="project-holo-kicker"><span>02 / 04</span> Design</p>
+                <h3 class="project-holo-title">Client Portfolio</h3>
+                <p class="project-holo-desc">
+                  A Personal Portfolio for a client with scroll-driven motion, artistic and rustic. 
+                </p>
+                </p>
+                <dl class="project-holo-metadata">
+                  <div><dt>Mode</dt><dd>Web App</dd></div>
+                  <div><dt>Signal</dt><dd>Full Stack</dd></div>
+                  <div><dt>Status</dt><dd>Live Shell</dd></div>
+                </dl>
+                <div class="project-holo-tech" aria-label="Technology stack">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">Javascript</span>
+                </div>
+                <div class="project-holo-actions">
+                  <a href="#contact" class="btn btn-primary btn-sm">
+                    <i class="fas fa-globe aria-hidden="true"></i> Live Demo
+                  </a>
+                  <a href="https://github.com/aaron-delacruz" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">
+                    <i class="fab fa-github" aria-hidden="true"></i> GitHub
+                  </a>
+                </div>
+              </article>
+
+              <article class="project-holo-panel"
+                      data-project-card
+                      data-holo-color="#9d7cff"
+                      data-holo-accent="#49d6ff"
+                      data-holo-icon="fas fa-comments"
+                      data-holo-label-a="XML"
+                      data-holo-label-b="Realtime Search "
+                      data-holo-label-c="User login">
+                <p class="project-holo-kicker"><span>03 / 04</span> Mobile Application</p>
+                <h3 class="project-holo-title">NUSpot</h3>
+                <p class="project-holo-desc">
+                  Real-time lost & Found system with user accounts, search, and realtime data.
+                </p>
+                <dl class="project-holo-metadata">
+                  <div><dt>Mode</dt><dd>Real-time</dd></div>
+                  <div><dt>Signal</dt><dd>Lost&Found App</dd></div>
+                  <div><dt>Status</dt><dd>Inactive</dd></div>
+                </dl>
+                <div class="project-holo-tech" aria-label="Technology stack">
+                  <span class="tag">Kotlin</span>
+                  <span class="tag">XML</span>
+                  <span class="tag">Firebase</span>
+                  <span class="tag">API</span>
+                </div>
+                <div class="project-holo-actions">
+                  <a href="#contact" class="btn btn-primary btn-sm" aria-label="Request private demo for NUSPot">
+                    <i class="fas fa-globe" aria-hidden="true"></i> Request Demo
+                  </a>
+                  <a href="https://github.com/ron-cd/LostAndFound" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">
+                    <i class="fab fa-github" aria-hidden="true"></i> GitHub
+                  </a>
+                </div>
+              </article>
+
+              <article class="project-holo-panel"
+                      data-project-card
+                      data-holo-color="#ffcf5a"
+                      data-holo-accent="#38e8ff"
+                      data-holo-icon="fas fa-chart-line"
+                      data-holo-label-a="Compilation"
+                      data-holo-label-b="Projects"
+                      data-holo-label-c="Activities">
+                <p class="project-holo-kicker"><span>04 / 04</span> Intelligence Array</p>
+                <h3 class="project-holo-title">Lab Works</h3>
+                <p class="project-holo-desc">
+                  Compilation of all school lab activities, including midterm to finals along with the group project.
+                </p>
+                <dl class="project-holo-metadata">
+                  <div><dt>Mode</dt><dd>Requirements</dd></div>
+                  <div><dt>Signal</dt><dd>School Works</dd></div>
+                  <div><dt>Status</dt><dd>Live Shell</dd></div>
+                </dl>
+                <div class="project-holo-tech" aria-label="Technology stack">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JavaScript</span>
+                </div>
+                <div class="project-holo-actions">
+                  <a href="lab-activities.html" class="btn btn-primary btn-sm" aria-label="Request private demo for DataPulse Analytics">
+                    <i class="fas fa-globe" aria-hidden="true"></i> Go to Projects directory
+                  </a>
+                </div>
+              </article>
+            </div>
+
+            <div class="project-holo-progress" aria-label="Choose a project">
+              <button type="button" class="is-active" data-holo-jump="0" aria-label="Show Space Portfolio" aria-current="true"></button>
+              <button type="button" data-holo-jump="1" aria-label="Show ShopNow Platform"></button>
+              <button type="button" data-holo-jump="2" aria-label="Show ChatSphere"></button>
+              <button type="button" data-holo-jump="3" aria-label="Show DataPulse Analytics"></button>
+            </div>
+          </div>
+
+          <!-- Projects hologram visual -->
+          <div class="project-holo-visual" aria-hidden="true">
+            <div class="project-holo-loader" data-holo-loader>
+              <span></span>
+              <p>Calibrating project core</p>
+            </div>
+
+            <div class="project-holo-shell" data-holo-shell>
+              <div class="project-holo-label project-holo-label-a">
+                <span>Mode</span>
+                <strong data-holo-label-a>Playful Portfolio</strong>
               </div>
-            </article>
+              <div class="project-holo-label project-holo-label-b">
+                <span>Vector</span>
+                <strong data-holo-label-b>Satellite Motion</strong>
+              </div>
+              <div class="project-holo-label project-holo-label-c">
+                <span>Signal</span>
+                <strong data-holo-label-c>CSS Nebula</strong>
+              </div>
 
-          </div><!-- /projects-track -->
+            
 
-          <div class="carousel-controls">
-            <button class="carousel-prev" aria-label="Previous project">
-              <i class="fas fa-chevron-left" aria-hidden="true"></i>
-            </button>
-            <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Project navigation"></div>
-            <button class="carousel-next" aria-label="Next project">
-              <i class="fas fa-chevron-right" aria-hidden="true"></i>
-            </button>
+              <canvas id="projects-hologram-canvas" class="project-holo-canvas"></canvas>
+              <div class="project-holo-css-core"></div>
+              <div class="project-holo-beam"></div>
+              <div class="project-holo-platform">
+                <span class="project-holo-platform-ring project-holo-platform-ring-one"></span>
+                <span class="project-holo-platform-ring project-holo-platform-ring-two"></span>
+                <span class="project-holo-platform-ring project-holo-platform-ring-three"></span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -593,15 +811,19 @@
   </section>
 
 
-  <!-- ═══════════════════════════════════════════════
-      CONTACT
-  ═══════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════
+       §6  CONTACT SECTION
+       Edit: contact-links (email, github, linkedin, twitter),
+             contact-form fields (add/remove as needed),
+             wire form submission in js/main.js initContactForm()
+             or connect a service — see docs/DEPLOYMENT.md
+       ═══════════════════════════════════════════════════════════════════ -->
   <section id="contact" aria-labelledby="contact-heading">
     <div class="container">
       <div class="section-inner">
 
-        <div class="reveal" style="text-align:center;margin-bottom:4rem">
-          <div class="section-label" style="justify-content:center">Get In Touch</div>
+        <div class="section-head section-head-center section-head-loose reveal">
+          <div class="section-label">Get In Touch</div>
           <h2 class="section-title" id="contact-heading">
             Let's <span class="gradient-text">work together</span>
           </h2>
@@ -614,7 +836,7 @@
             <h3>Open to opportunities</h3>
             <p>
               Whether you have a project in mind, a job opportunity, or just want to
-              say hello — my inbox is always open. I'll do my best to get back to you!
+              say hello, my inbox is always open. I'll do my best to get back to you.
             </p>
             <div class="contact-links">
               <a href="mailto:ronkydc@gmail.com" class="contact-link">
@@ -625,44 +847,53 @@
                 <i class="fab fa-github" aria-hidden="true"></i>
                 <span>https://github.com/ron-cd</span>
               </a>
-              <a href="https://linkedin.com/in/aaron-delacruz" target="_blank" rel="noopener noreferrer" class="contact-link">
+              <a href="https://www.linkedin.com/in/aaron-dela-cruz-99734a30b/" target="_blank" rel="noopener noreferrer" class="contact-link">
                 <i class="fab fa-linkedin" aria-hidden="true"></i>
-                <span>linkedin.com/in/aaron-delacruz</span>
+                <span>linkedin.com/in/aaron-dela-cruz-99734a30b/</span>
               </a>
             </div>
           </div>
 
           <!-- Form -->
           <div class="reveal reveal-right">
-            <form class="contact-form" id="contact-form" novalidate
+            <form class="contact-form" id="contact-form" name="contact" action="/" method="POST"
+                  data-netlify="true" netlify data-netlify-honeypot="bot-field" novalidate
                   aria-label="Contact form">
+              <input type="hidden" name="form-name" value="contact" />
+              <p class="netlify-honeypot" aria-hidden="true">
+                <label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+              </p>
               <div class="form-group">
                 <label for="name"    class="form-label">Your Name</label>
                 <input  type="text"  id="name"    name="name"
-                        class="form-input" placeholder="John Doe"
-                        required autocomplete="name" />
+                        class="form-input" placeholder="Juan Dela Cruz"
+                        required autocomplete="name" aria-describedby="name-error" />
+                <p class="form-error" id="name-error" role="alert" aria-live="polite"></p>
               </div>
               <div class="form-group">
                 <label for="email"   class="form-label">Email Address</label>
                 <input  type="email" id="email"   name="email"
-                        class="form-input" placeholder="john@example.com"
-                        required autocomplete="email" />
+                        class="form-input" placeholder="you@company.com"
+                        required autocomplete="email" aria-describedby="email-error" />
+                <p class="form-error" id="email-error" role="alert" aria-live="polite"></p>
               </div>
               <div class="form-group">
                 <label for="subject" class="form-label">Subject</label>
                 <input  type="text"  id="subject" name="subject"
-                        class="form-input" placeholder="Project Inquiry" />
+                        class="form-input" placeholder="Frontend role or project build" />
               </div>
               <div class="form-group">
                 <label for="message" class="form-label">Message</label>
                 <textarea id="message" name="message"
                           class="form-textarea"
                           placeholder="Tell me about your project..."
-                          required></textarea>
+                          required aria-describedby="message-error"></textarea>
+                <p class="form-error" id="message-error" role="alert" aria-live="polite"></p>
               </div>
               <button type="submit" class="btn-submit" id="submit-btn">
                 <i class="fas fa-paper-plane" aria-hidden="true"></i> Send Message
               </button>
+              <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
             </form>
           </div>
 
@@ -670,28 +901,30 @@
       </div>
     </div>
   </section>
+  </main>
 
 
-  <!-- ═══════════════════════════════════════════════
-      FOOTER
-  ═══════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════
+       §7  FOOTER
+       Edit: footer-kicker quick links, footer-wordmark initials (AKDC),
+             footer-route city name, footer-copy name
+       ═══════════════════════════════════════════════════════════════════ -->
   <footer class="footer" role="contentinfo">
+    <div class="footer-starfield" aria-hidden="true"></div>
     <div class="container">
       <div class="footer-inner">
-        <p class="footer-copy">
-          &copy; <span id="footer-year">2025</span>
-          <strong>Aaron Dela Cruz</strong>. Crafted with ❤️ and lots of ☕
-        </p>
-        <div class="footer-socials">
-          <a href="https://github.com/ron-cd"target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="GitHub">
-            <i class="fab fa-github"  aria-hidden="true"></i>
-          </a>
-          <a href="https://www.linkedin.com/in/aaron-dela-cruz-99734a30b"  target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="LinkedIn">
-            <i class="fab fa-linkedin" aria-hidden="true"></i>
-          </a>
-          <a href="mailto:ronkydc@gmail.com" class="footer-social" aria-label="Send email">
-            <i class="fas fa-envelope" aria-hidden="true"></i>
-          </a>
+        <div class="footer-kicker" aria-label="Footer quick links">
+          <a href="https://www.facebook.com/ronndcz" target="_blank">Caution<br>Open Signal</a>
+          <a href="https://www.instagram.com/_ronn.dc/">Contains<br>Orbit-Craft</a>
+          <a href="#contact">Contact<br>FAQ</a>
+          <a href="https://github.com/ron-cd" target="_blank" rel="noopener noreferrer">@AaronDev<br>GitHub</a>
+        </div>
+
+        <a href="#hero" class="footer-wordmark" aria-label="Back to top">AKDC</a>
+
+        <div class="footer-bottom">
+          <p class="footer-route">Mabalacat City &rarr; Low Orbit &rarr; Earth</p>
+          <p class="footer-copy">&copy; <span id="footer-year">2025</span> Aaron Dela Cruz</p>
         </div>
       </div>
     </div>
@@ -701,6 +934,12 @@
   <script>
     document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>
+
+  <!-- Animated space background (milky way, nebulae, stars) -->
+  <script src="js/space-bg.js" defer></script>
+
+  <!-- Satellite 3D viewer (hero only) -->
+  <script src="js/satellite.js" defer></script>
 
   <!-- Main JS bundle (ES module) -->
   <script type="module" src="js/main.js"></script>

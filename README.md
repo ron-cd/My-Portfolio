@@ -1,197 +1,102 @@
-# Aaron Dela Cruz — Space Portfolio
+# Aaron Dela Cruz - Space Portfolio
 
-> A space-themed personal portfolio with a scroll-driven satellite, realistic CSS Earth, particle systems, and smooth section animations. Built with **vanilla HTML, CSS, and JavaScript** — zero frameworks, zero build tools required.
+Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, and Three.js. The site ships as static files and is ready for GitHub Pages, Netlify, Vercel, or any static host.
 
-![Preview](assets/images/og-image.png)
+## What Ships
 
----
+- Full-screen animated space background on canvas
+- Three.js OBJ satellite with responsive scroll path, auto-rotation, and drag rotation
+- GSAP ScrollTrigger reveal animations and skill bars
+- Responsive hero, skills, certifications, projects, contact, and poster-style footer
+- Mobile navigation and touch-friendly project browsing
+- Static deployment model with no build step
 
-## 📁 Project Structure
+## Project Structure
 
-```
-aaron-portfolio/
-├── index.html              # Main entry point
-│
-├── css/
-│   ├── base.css            # Design tokens, reset, utilities, buttons
-│   ├── space.css           # Globe, satellite, particles, nebula, stars
-│   └── sections.css        # Navbar, hero, about, skills, projects, contact, footer
-│
-├── js/
-│   ├── utils.js            # Math helpers (lerp, clamp, easeInOutCubic…)
-│   ├── scroll.js           # Scroll tracker & active-section detection
-│   ├── animation.js        # Satellite path + particles + scroll-reveal
-│   └── main.js             # Boot — wires all modules together
-│
-├── assets/
-│   ├── images/
-│   │   └── og-image.png    # Open Graph / social share image (1200×630)
-│   ├── icons/
-│   │   ├── favicon.svg
-│   │   ├── favicon-32.png
-│   │   ├── apple-touch-icon.png
-│   │   └── site.webmanifest
-│   └── fonts/              # Self-hosted font fallbacks (optional)
-│
-└── docs/
-    ├── ARCHITECTURE.md     # Codebase decisions & module map
-    ├── DEPLOYMENT.md       # GitHub Pages, Netlify, custom domain setup
-    ├── CUSTOMISATION.md    # How to edit colours, content, satellite path
-    └── CHANGELOG.md        # Version history
+```text
+.
+|-- index.html
+|-- css/
+|   |-- base.css       # Tokens, reset, global utilities
+|   |-- space.css      # Fixed background and satellite loader styles
+|   `-- sections.css   # Navbar, sections, cards, footer, responsive rules
+|-- js/
+|   |-- main.js        # App boot and UI systems
+|   |-- animation.js   # GSAP reveals and skill bar animation
+|   |-- satellite.js   # Three.js satellite model and scroll path
+|   |-- space-bg.js    # Animated star/nebula canvas
+|   |-- scroll.js      # Scroll progress and active section tracking
+|   `-- utils.js       # Small shared helpers
+|-- assets/
+|   |-- satellite/
+|   `-- icons/
+|-- libs/              # Local GSAP, ScrollTrigger, Three.js, OBJ/MTL loaders
+`-- docs/
 ```
 
----
+## Local Development
 
-## 🚀 Quick Start
-
-No build step needed — just open the file.
+Use a local server. ES modules and model assets should not be opened via `file://`.
 
 ```bash
-# Clone
-git clone https://github.com/aaron-delacruz/aaron-portfolio.git
-cd aaron-portfolio
-
-# Option 1: open directly
-open index.html
-
-# Option 2: local dev server (recommended — needed for ES modules)
+npm install
+npm test
 npx serve .
-# or
-python3 -m http.server 8080
 ```
 
-> **Note:** ES `import`/`export` requires a server (even `file://` won't work in most browsers). Use `npx serve .` or VS Code Live Server.
+Any static server works:
 
----
-
-## ✏️ Personalising Content
-
-All personal content lives in **`index.html`**. Search for the following placeholders and replace them:
-
-| Placeholder | Replace with |
-|---|---|
-| `Aaron Dela Cruz` | Your full name |
-| `ronkydc@gmail.com` | Your email address |
-| `https://github.com/ron-cd` | Your GitHub Pages URL |
-| `https://github.com/ron-cd` | Your GitHub profile |
-| `linkedin.com/in/aaron-dela-cruz-99734a30b/` | Your LinkedIn URL |
-| `Mabalacat City, PH` | Your location |
-| `assets/Aaron-Dela-Cruz-CV.pdf` | Your CV file path |
-| Project titles, descriptions, links | Your actual projects |
-
-### Changing colours
-
-Open `css/base.css` and edit the `:root` block:
-
-```css
-:root {
-  --clr-accent:   #4da6ff;   /* primary blue accent */
-  --clr-accent-2: #7b5ea7;   /* purple accent */
-  --clr-accent-3: #00d4aa;   /* teal accent */
-  --clr-bg:       #050810;   /* page background */
-}
+```bash
+python -m http.server 8080
 ```
 
-### Changing the satellite path
+## Production Checklist
 
-Open `js/animation.js` and edit `_waypoints`:
+- Replace placeholder contact links and email addresses in `index.html`
+- Set the canonical URL and Open Graph URL to the production domain
+- Confirm `assets/Aaron-Dela-Cruz-CV.pdf` exists or update the CV link
+- Add real project URLs and screenshots/previews
+- Run `npm test`
+- Test Chrome, Firefox, Safari, iOS Safari, and Android Chrome
+- Run Lighthouse and fix any accessibility or performance regressions
+- Deploy on Netlify and confirm contact submissions appear under **Forms**
+
+## Customizing The Satellite
+
+Edit `js/satellite.js`.
+
+- `WAYPOINTS.desktop`, `WAYPOINTS.tablet`, and `WAYPOINTS.mobile` control position, rotation, and scale.
+- `AUTO_ROTATE_SPD` controls idle spin speed. Higher values spin more slowly.
+- `OBJ_PATH` points to the satellite model.
+
+Waypoint values:
 
 ```js
-_waypoints: [
-  { p: 0.00, x: 0.88, y: 0.10, rot:  20 },  // Hero — top right
-  { p: 0.20, x: 0.55, y: 0.06, rot: -15 },  // About
-  { p: 0.40, x: 0.08, y: 0.40, rot: -80 },  // Skills
-  { p: 0.60, x: 0.12, y: 0.75, rot: -60 },  // Projects
-  { p: 0.80, x: 0.82, y: 0.70, rot:  50 },  // Contact
-  { p: 1.00, x: 0.50, y: 0.92, rot:   0 },  // Footer — middle bottom
-],
+{ p: 0.40, x: 0.12, y: 0.38, rotZ: -72, scale: 0.66 }
 ```
 
-`x` and `y` are fractions of viewport width/height (0.0–1.0). `rot` is the tilt in degrees.
+- `p`: page scroll progress, from `0` to `1`
+- `x`: viewport width fraction
+- `y`: viewport height fraction
+- `rotZ`: canvas tilt in degrees
+- `scale`: transform scale for the fixed satellite canvas
 
----
+## Responsive Notes
 
-## 🌐 Deployment
+The main responsive rules live near the end of `css/sections.css` in the "Production responsive hardening" block. Keep new overrides there when the change is meant to protect layouts across breakpoints.
 
-See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for full instructions. Quick version:
+Primary breakpoints:
 
-### GitHub Pages
+- `1440px+`: wide desktop polish
+- `1200px`: laptop and tablet landscape
+- `900px`: tablet portrait
+- `640px`: mobile
+- `420px`: very small phones
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/aaron-portfolio.git
-git push -u origin main
-```
+## Deployment
 
-Then in GitHub → Settings → Pages → Source: **Deploy from branch** → `main` / `/ (root)`.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for GitHub Pages, Netlify, Vercel, custom domain, and security header notes.
 
-Your site will be live at `https://YOUR_USERNAME.github.io/aaron-portfolio/`.
+## License
 
-### Netlify (drag & drop)
-
-1. Go to [netlify.com](https://netlify.com)
-2. Drag the `aaron-portfolio/` folder onto the deploy zone
-3. Done — live in 30 seconds
-
----
-
-## ♿ Accessibility
-
-- Semantic HTML5 (`<header>`, `<nav>`, `<section>`, `<article>`, `<footer>`)
-- All decorative elements have `aria-hidden="true"`
-- Interactive elements have visible focus styles
-- `aria-label` on all icon-only buttons
-- `aria-live="polite"` on the carousel
-- Respects `prefers-reduced-motion`
-- Colour contrast ratio ≥ 4.5:1 for all text
-
----
-
-## 🔒 Security
-
-- All external links use `rel="noopener noreferrer"`
-- Font Awesome loaded via CDN with **SRI hash** (`integrity=` attribute)
-- No cookies, no tracking, no third-party scripts beyond fonts + icons
-- Content Security Policy header recommended — see `docs/DEPLOYMENT.md`
-- No `eval()`, no `innerHTML` with user data
-
----
-
-## ⚡ Performance
-
-- No frameworks, no bundler — single HTTP request per asset
-- Fonts loaded with `preconnect` + `display=swap`
-- Animations use only `transform` and `opacity` (GPU-composited layers)
-- `will-change: transform` only on the satellite
-- `IntersectionObserver` for lazy scroll-reveal
-- `requestAnimationFrame` + passive scroll listeners
-- Canvas particles scale down on mobile (55 vs 110)
-
----
-
-## 🗺️ Browser Support
-
-| Browser | Version |
-|---|---|
-| Chrome / Edge | 90+ |
-| Firefox | 88+ |
-| Safari | 14+ |
-| Mobile Safari | iOS 14+ |
-| Samsung Internet | 14+ |
-
-ES Modules (`type="module"`) are required. No IE11 support.
-
----
-
-## 📄 Licence
-
-MIT — free to use, modify, and distribute. Attribution appreciated but not required.
-
----
-
-## 👤 Author
-
-**Aaron Dela Cruz**  
-[github.com/aaron-delacruz](https://github.com/ron-cd) · [linkedin.com/in/aaron-delacruz](https://www.linkedin.com/in/aaron-dela-cruz-99734a30b)
+MIT
