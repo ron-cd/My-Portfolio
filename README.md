@@ -2,7 +2,6 @@
 
 Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, and Three.js. The site ships as static files and is ready for GitHub Pages, Netlify, Vercel, or any static host.
 
-<<<<<<< HEAD
 ## What Ships
 =======
 ![Preview](assets/img/og-image.png)
