@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aaron-delacruz.github.io/sitemap.xml
+Sitemap:https://github.com/ron-cd/My-Portfolio/sitemap.xml
