@@ -19,12 +19,24 @@
   let W = 0, H = 0;
   let t = 0;          // frame counter
   let raf;
+  let lastFrameTime = 0;
+
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const compactQuery = window.matchMedia('(max-width: 760px)');
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const lowPower = Boolean(connection?.saveData)
+    || compactQuery.matches
+    || (navigator.hardwareConcurrency || 8) <= 4
+    || (navigator.deviceMemory || 8) <= 4;
+  const frameInterval = motionQuery.matches ? Infinity : 1000 / (lowPower ? 24 : 40);
+  const enableShooters = !lowPower && !motionQuery.matches;
 
   /* ── Resize ── */
   function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
     buildStars();     // rebuild star positions on resize
+    if (motionQuery.matches) drawFrame();
   }
 
   /* ════════════════════════════════════════════
@@ -36,9 +48,8 @@
 
   function buildStars() {
     stars = [];
-    const dpr    = Math.min(window.devicePixelRatio, 2);
     const area   = W * H;
-    const count  = Math.floor(area / 3000);   // density relative to screen area
+    const count  = Math.floor(area / (lowPower ? 5200 : 3400));
 
     for (let i = 0; i < count; i++) {
       const rnd  = Math.random();
@@ -340,6 +351,8 @@
   }
 
   function drawShooters() {
+    if (!enableShooters) return;
+
     // Randomly spawn
     if (Math.random() < 0.003 && shooters.length < 3) spawnShooter();
 
@@ -380,8 +393,7 @@
   /* ════════════════════════════════════════════
      RENDER LOOP
   ════════════════════════════════════════════ */
-  function render() {
-    t++;
+  function drawFrame() {
 
     // Deep space base — composited over the CSS bg-gradient
     ctx.clearRect(0, 0, W, H);
@@ -390,6 +402,14 @@
     drawNebulae();
     drawStars();
     drawShooters();
+  }
+
+  function render(now = 0) {
+    if (now - lastFrameTime >= frameInterval) {
+      lastFrameTime = now;
+      t += lowPower ? 1.4 : 1;
+      drawFrame();
+    }
 
     raf = requestAnimationFrame(render);
   }
@@ -397,10 +417,14 @@
   /* ── Pause when tab hidden ── */
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) cancelAnimationFrame(raf);
-    else render();
+    else if (!motionQuery.matches) raf = requestAnimationFrame(render);
   });
 
   window.addEventListener('resize', resize, { passive: true });
   resize();
-  render();
+  if (motionQuery.matches) {
+    drawFrame();
+  } else {
+    raf = requestAnimationFrame(render);
+  }
 })();

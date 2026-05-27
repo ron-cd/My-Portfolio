@@ -8,9 +8,10 @@ Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, an
 
 - Full-screen animated space background on canvas
 - Three.js OBJ satellite with responsive scroll path, auto-rotation, and drag rotation
-- GSAP ScrollTrigger reveal animations and skill bars
+- GSAP ScrollTrigger reveal animations, certifications stack, and projects hologram
 - Responsive hero, skills, certifications, projects, contact, and poster-style footer
 - Mobile navigation and touch-friendly project browsing
+- Lab Activities archive page under `html/lab-activities.html`
 - Static deployment model with no build step
 
 ## Project Structure
@@ -18,13 +19,17 @@ Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, an
 ```text
 .
 |-- index.html
+|-- html/
+|   `-- lab-activities.html
 |-- css/
 |   |-- base.css       # Tokens, reset, global utilities
 |   |-- space.css      # Fixed background and satellite loader styles
-|   `-- sections.css   # Navbar, sections, cards, footer, responsive rules
+|   |-- sections.css   # Navbar, sections, cards, footer, responsive rules
+|   `-- lab-activities.css
 |-- js/
+|   |-- boot.js        # Preloader and footer year
 |   |-- main.js        # App boot and UI systems
-|   |-- animation.js   # GSAP reveals and skill bar animation
+|   |-- animation.js   # GSAP reveals, cert stack, and projects hologram
 |   |-- satellite.js   # Three.js satellite model and scroll path
 |   |-- space-bg.js    # Animated star/nebula canvas
 |   |-- scroll.js      # Scroll progress and active section tracking
@@ -33,6 +38,9 @@ Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, an
 |   |-- satellite/
 |   `-- icons/
 |-- libs/              # Local GSAP, ScrollTrigger, Three.js, OBJ/MTL loaders
+|-- scripts/
+|   |-- check-static-site.js
+|   `-- serve-static.js
 `-- docs/
 ```
 
@@ -41,23 +49,21 @@ Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, an
 Use a local server. ES modules and model assets should not be opened via `file://`.
 
 ```bash
-npm install
 npm test
-npx serve .
+npm run serve
 ```
 
-Any static server works:
+The default local URL is `http://127.0.0.1:4173/`. To use another port:
 
 ```bash
-python -m http.server 8080
+npm run serve -- 8080
 ```
 
 ## Production Checklist
 
-- Replace placeholder contact links and email addresses in `index.html`
-- Set the canonical URL and Open Graph URL to the production domain
-- Confirm `assets/Aaron-Dela-Cruz-CV.pdf` exists or update the CV link
-- Add real project URLs and screenshots/previews
+- Confirm the production URL is `https://ron-cd.github.io/My-Portfolio/` or update canonical, Open Graph, `robots.txt`, and `sitemap.xml`
+- Confirm `assets/Aaron_Dela_Cruz_CV.pdf` exists or update the CV link
+- Confirm project URLs and the Lab Activities archive link work
 - Run `npm test`
 - Test Chrome, Firefox, Safari, iOS Safari, and Android Chrome
 - Run Lighthouse and fix any accessibility or performance regressions

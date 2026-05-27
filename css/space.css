@@ -73,52 +73,11 @@
   animation: spin 0.8s linear infinite;
 }
 
-/* ─── Icon colour helpers ───────────────────────────────────────────────────── */
+/* Lightweight fallback for compact or reduced-motion devices */
 
-.tech-html {
-  color: #e34c26;
-}
-
-.tech-css {
-  color: #264de4;
-}
-
-.tech-js {
-  color: #f7df1e;
-}
-
-.tech-react {
-  color: #61dafb;
-}
-
-.tech-node {
-  color: #68a063;
-}
-
-.tech-py {
-  color: #3776ab;
-}
-
-.tech-php {
-  color: #8892be;
-}
-
-.tech-db {
-  color: #00758f;
-}
-
-.tech-git {
-  color: #f05032;
-}
-
-.tech-docker {
-  color: #2496ed;
-}
-
-.tech-linux {
-  color: #ffd166;
-}
-
-.tech-cloud {
-  color: #6ca0dc;
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
+  .sat-canvas-fixed,
+  .sat-loader {
+    display: none !important;
+  }
 }

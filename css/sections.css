@@ -8,7 +8,7 @@
    1.  Navbar              (.nav, .nav-logo, .nav-links, .nav-toggle)
    2.  Hero                (#hero, .hero-content, .hero-title, .hero-badge …)
    3.  About               (#about, .about-grid, .about-content …)
-   4.  Skills              (#skills, .skills-grid, .skill-category …)
+   4.  Skills              (#skills, .skills-belt, .skill-belt-item)
    5.  Contact             (#contact, .contact-grid, .contact-form …)
    6.  Footer              (.footer, .footer-inner, .footer-wordmark …)
    7.  Certifications      (#certifications, .cert-stack-scene, .cert-stack-card …)
@@ -860,144 +860,6 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   §4  SKILLS
-   Edit: skills-grid columns (default 3), skill-bar colours (--clr-accent),
-         skill-fill widths are set via data-width="xx" in HTML
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-#skills {
-  background: var(--clr-bg-2);
-  position: relative;
-}
-
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-top: 3rem;
-}
-
-.skill-category {
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius-lg);
-  padding: 1.8rem;
-  transition: var(--transition-normal);
-}
-
-.skill-category:hover {
-  border-color: var(--clr-border-2);
-  box-shadow: 0 0 40px var(--clr-glow);
-}
-
-.skill-cat-header {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-  margin-bottom: 1.5rem;
-}
-
-.skill-cat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-}
-
-.skill-cat-name {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.skill-bar-wrap {
-  margin-bottom: .9rem;
-}
-
-.skill-bar-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: .4rem;
-  font-size: .8rem;
-  color: var(--clr-text-muted);
-}
-
-.skill-bar-label span:last-child {
-  font-family: var(--font-mono);
-  font-size: .73rem;
-  color: var(--clr-accent);
-}
-
-.skill-bar-track {
-  height: 4px;
-  background: var(--clr-surface-2);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.skill-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  width: 0;
-  background: linear-gradient(90deg, var(--clr-accent), var(--clr-accent-3));
-  transition: width 1.2s cubic-bezier(.25, 1, .5, 1);
-  box-shadow: 0 0 8px var(--clr-glow);
-}
-
-.skill-icons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .6rem;
-  margin-top: 1.2rem;
-}
-
-.skill-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .4rem;
-  padding: .8rem;
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius-md);
-  min-width: 68px;
-  transition: var(--transition-spring);
-}
-
-.skill-icon:hover {
-  border-color: var(--clr-border-2);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
-}
-
-.skill-icon i {
-  font-size: 1.35rem;
-  color: var(--clr-accent);
-}
-
-.skill-icon span {
-  font-size: .67rem;
-  color: var(--clr-text-muted);
-}
-
-@media (max-width: 900px) {
-  .skills-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .skills-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    §5  CONTACT
    Edit: contact-grid ratio (1fr 1.4fr), form colours, btn-submit gradient,
          social links are in index.html #contact section
@@ -1013,19 +875,6 @@
   grid-template-columns: 1fr 1.4fr;
   gap: 4rem;
   align-items: start;
-}
-
-.contact-info h3 {
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-}
-
-.contact-info p {
-  color: var(--clr-text-muted);
-  line-height: 1.7;
-  margin-bottom: 2rem;
 }
 
 .contact-links {
@@ -1404,10 +1253,6 @@
     right: 1rem;
   }
 
-  .project-info {
-    padding: 1.5rem;
-  }
-
   .contact-grid {
     gap: 2.5rem;
   }
@@ -1446,10 +1291,6 @@
   .skills-grid,
   .contact-grid {
     grid-template-columns: 1fr;
-  }
-
-  .project-img {
-    min-height: 190px;
   }
 
   .footer-bottom {
@@ -1533,7 +1374,6 @@
     grid-template-columns: 1fr;
   }
 
-  .skill-category,
   .contact-form {
     padding: 1.25rem;
   }
@@ -1781,12 +1621,6 @@
   gap: .6rem;
 }
 
-/* ── Progress dots ── */
-
-.cert-stack-progress {
-  display: none;
-}
-
 /* ── Responsive ── */
 
 @media (max-width: 768px) {
@@ -1904,7 +1738,6 @@ main > section {
 /* Shared depth shadow for cards and interactive surfaces */
 
 .about-img-card,
-.skill-category,
 .contact-form,
 .contact-link,
 .hero-card {
@@ -1932,42 +1765,15 @@ main > section {
 }
 
 .about-highlight-item,
-.skill-category,
 .contact-link {
   transform: translateZ(0);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .about-highlight-item:hover,
-  .skill-category:hover,
   .contact-link:hover {
     transform: translateY(-4px);
   }
-}
-
-.skill-cat-icon {
-  color: var(--clr-text);
-  box-shadow: inset 0 1px 0 rgba(232, 237, 248, .2);
-}
-
-.skill-cat-icon-alt {
-  background: linear-gradient(135deg, var(--clr-accent-2), var(--clr-accent-3));
-}
-
-.skill-cat-icon-warm {
-  background: linear-gradient(135deg, #c85f42, #d59a45);
-}
-
-.skill-category:hover {
-  box-shadow: inset 0 1px 0 rgba(232, 237, 248, .07), 0 20px 60px rgba(6, 12, 24, .34);
-}
-
-.skill-icon {
-  min-height: 74px;
-}
-
-.skill-icon:active {
-  transform: scale(.97);
 }
 
 .contact-form {
@@ -2074,10 +1880,6 @@ main > section {
   .about-actions .btn {
     width: 100%;
     justify-content: center;
-  }
-
-  .project-img > i {
-    font-size: 4rem;
   }
 
   .contact-link {
@@ -2538,56 +2340,6 @@ main > section {
   background: var(--clr-accent);
   box-shadow: 0 0 20px rgba(100, 181, 246, .36);
   vertical-align: .15em;
-}
-
-.skill-cat-header {
-  align-items: flex-start;
-}
-
-.skill-cat-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-}
-
-.skill-cat-name {
-  font-size: 1.08rem;
-}
-
-.skill-cat-desc {
-  max-width: 28ch;
-  margin-top: .28rem;
-  color: var(--clr-text-muted);
-  font-size: .78rem;
-  line-height: 1.5;
-}
-
-.skills-grid-premium .skill-bar-wrap {
-  margin-bottom: 1rem;
-}
-
-.skills-grid-premium .skill-bar-track {
-  height: 6px;
-  background: linear-gradient(90deg, rgba(232, 237, 248, .05), rgba(232, 237, 248, .11));
-}
-
-.skills-grid-premium .skill-fill {
-  background: linear-gradient(90deg, var(--clr-accent), var(--clr-accent-3));
-  box-shadow: 0 0 16px rgba(100, 181, 246, .22);
-}
-
-.skills-grid-premium .skill-icons {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: .55rem;
-}
-
-.skills-grid-premium .skill-icon {
-  min-width: 0;
-  min-height: 82px;
-  justify-content: center;
-  border-radius: 18px;
-  background: rgba(232, 237, 248, .04);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -3308,29 +3060,6 @@ main > section {
   opacity: 0;
 }
 
-.project-holo-icon-core {
-  position: absolute;
-  left: 50%;
-  top: 35%;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  width: clamp(3rem, 5vw, 4.6rem);
-  height: clamp(3rem, 5vw, 4.6rem);
-  transform: translate(-50%, -50%);
-  border: 1px solid color-mix(in srgb, var(--project-holo-color) 36%, transparent);
-  border-radius: 50%;
-  background: rgba(2, 5, 11, .42);
-  color: var(--project-holo-color);
-  box-shadow: 0 0 26px color-mix(in srgb, var(--project-holo-color) 44%, transparent), inset 0 0 18px color-mix(in srgb, var(--project-holo-color) 18%, transparent);
-  text-shadow: 0 0 18px currentColor;
-  animation: projectHoloIconFloat 3.8s ease-in-out infinite;
-}
-
-.project-holo-icon-core i {
-  font-size: clamp(1.25rem, 2vw, 1.85rem);
-}
-
 .project-holo-beam {
   left: 50%;
   bottom: 18%;
@@ -3698,10 +3427,6 @@ main > section {
     animation-duration: 3.8s;
   }
 
-  .project-holo-icon-core {
-    top: 37%;
-  }
-
   .project-holo-platform {
     width: 88%;
   }
@@ -3713,7 +3438,6 @@ main > section {
   .project-holo-stage-scan::after,
   .project-holo-shell::before,
   .project-holo-css-core,
-  .project-holo-icon-core,
   .project-holo-beam,
   .project-holo-platform-ring,
   .project-holo-label,
@@ -4051,8 +3775,7 @@ section,
     height: 2.25rem;
   }
 
-  .contact-form,
-  .skill-category {
+  .contact-form {
     border-radius: 18px;
   }
 
@@ -4076,8 +3799,7 @@ section,
 
   .hero-desc,
   .about-text,
-  .project-holo-desc,
-  .contact-info p {
+  .project-holo-desc {
     font-size: .9rem;
   }
 

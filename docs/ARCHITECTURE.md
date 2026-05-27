@@ -6,19 +6,22 @@ This portfolio is a static site with focused JavaScript modules. There is no bun
 
 ```text
 index.html
-├── css/base.css            — tokens, reset, utilities
-├── css/space.css           — space background and satellite canvas defaults
-├── css/sections.css        — all section & component styles
-├── libs/gsap.min.js        — GSAP core
-├── libs/ScrollTrigger.min.js
-├── libs/three.min.js       — Three.js r139 (UMD build)
-├── libs/OBJLoader.js
-├── js/space-bg.js          — canvas starfield (deferred)
-├── js/satellite.js         — Three.js satellite renderer (deferred)
-└── js/main.js              — entry point (type="module")
-     ├── imports utils.js
-     ├── imports scroll.js
-     └── imports animation.js
+|-- html/lab-activities.html
+|-- css/base.css             - tokens, reset, utilities
+|-- css/space.css            - space background and satellite canvas defaults
+|-- css/sections.css         - main section and component styles
+|-- css/lab-activities.css   - lab archive page styles
+|-- libs/gsap.min.js         - GSAP core
+|-- libs/ScrollTrigger.min.js
+|-- libs/three.min.js        - Three.js r128 UMD build
+|-- libs/OBJLoader.js
+|-- js/boot.js               - preloader and footer year
+|-- js/space-bg.js           - canvas starfield
+|-- js/satellite.js          - Three.js satellite renderer
+`-- js/main.js               - entry point (type="module")
+    |-- imports utils.js
+    |-- imports scroll.js
+    `-- imports animation.js
 ```
 
 ## CSS Responsibilities
@@ -28,6 +31,7 @@ index.html
 | `base.css` | Design tokens, reset, typography helpers, buttons, containers | Changing brand colours, fonts, or global spacing |
 | `space.css` | Fixed background layer and satellite loader defaults | Adjusting starfield or satellite loading UI |
 | `sections.css` | Section layouts, all components, responsive hardening | Adding or styling new sections/components |
+| `lab-activities.css` | Lab archive page layout | Editing the standalone lab archive page |
 
 Production breakpoint overrides live late in `sections.css` and intentionally override component defaults.
 
@@ -49,7 +53,8 @@ Production breakpoint overrides live late in `sections.css` and intentionally ov
 | File | Purpose |
 |---|---|
 | `main.js` | App boot: navbar, typing text, contact form, cursor glow, hero parallax |
-| `animation.js` | GSAP scroll reveals, skill bar fills, cert gallery, projects hologram |
+| `animation.js` | GSAP scroll reveals, cert gallery, projects hologram |
+| `boot.js` | No-module boot helpers: preloader class and footer year |
 | `satellite.js` | Three.js satellite renderer, model loading, drag rotation, scroll path |
 | `space-bg.js` | Canvas starfield, nebulae, Milky Way, shooting stars |
 | `scroll.js` | Scroll progress tracking, active-section detection, `sectionChange` events |
@@ -92,10 +97,7 @@ Three responsive waypoint profiles:
 
 ## GSAP Reveal System
 
-`animation.js` uses `fromTo` animations for scroll reveals. Skill bar fills are defensive:
-- If GSAP is unavailable, bars get their final `data-width` immediately.
-- If a bar is already visible on load, it is set immediately.
-- If offscreen, it animates when scrolled into view.
+`animation.js` uses `fromTo` animations for scroll reveals. If GSAP is unavailable, the site keeps content visible and skips pinned scroll effects.
 
 ## Projects — Hologram Interface
 
@@ -107,7 +109,7 @@ The projects section uses a hologram projection interface (`#projects-dock`):
 The Three.js hologram canvas (`#projects-hologram-canvas`) renders a rotating orbit sphere that responds to mouse position and changes colour per project.
 
 **To add a project:** Copy an existing `<article class="project-holo-panel">` block in `index.html` and update:
-- `data-holo-color`, `data-holo-accent`, `data-holo-icon`
+- `data-holo-color`, `data-holo-accent`
 - `data-holo-label-a/b/c` (appear in the hologram visual)
 - Kicker text, title, description, metadata, tech tags, and action buttons
 - Add a corresponding dot button in `.project-holo-progress`

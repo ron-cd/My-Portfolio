@@ -44,7 +44,7 @@ Defined in `css/base.css` under `:root`.
 
 | Token | Value | Usage |
 |---|---|---|
-| `--clr-accent` | `#64b5f6` | Links, active states, skill bars, borders |
+| `--clr-accent` | `#64b5f6` | Links, active states, skills belt dots, borders |
 | `--clr-accent-2` | `#7d719d` | Gradients, secondary buttons |
 | `--clr-accent-3` | `#00d4aa` | Tertiary pop colour (teal/green), cert links |
 | `--clr-glow` | `rgba(100,181,246, 0.22)` | Box-shadow glow for accented elements |
@@ -103,7 +103,7 @@ Defined in `css/base.css` and `js/animation.js`.
 |---|---|---|
 | `--transition-fast` | `160ms` | Hover colour/border changes |
 | `--transition-normal` | `280ms` | Card lifts, nav glass |
-| `--transition-spring` | `420ms` | Buttons, skill icon lifts |
+| `--transition-spring` | `420ms` | Buttons and lifted interactive surfaces |
 
 ### GSAP Animations
 
@@ -112,7 +112,6 @@ Defined in `css/base.css` and `js/animation.js`.
 | Scroll reveal (`.reveal`) | 0.75s | Element enters viewport (top 90%) |
 | Scroll reveal (`.reveal-left/right`) | 0.75s | Same, with x offset |
 | Child stagger (`.reveal-child`) | 0.5s per child | 0.08s stagger |
-| Skill bar fills | 1.4s | Bar enters viewport (top 88%) |
 | Hero entrance | 0.75s | Page load, 0.5s delay |
 | Cert card stack | Scrub | GSAP ScrollTrigger pin |
 | Project hologram | Scrub | GSAP ScrollTrigger pin |
@@ -154,10 +153,8 @@ Container max-width: `1180px` (token: `--container-max`), expanding to `1280px` 
 Icons use **Font Awesome 6.4.0** via CDN (loaded with `<link rel="preload">`). All decorative icons have `aria-hidden="true"`. Interactive icons inside buttons use the button's label for accessible text.
 
 Icon sizes used:
-- `1rem` — skill category icons
 - `1.1rem` — contact link icons
 - `1.2rem` — about highlight icons
-- `1.35rem` — skill icon grid
 - `font-size: 5rem+` — large decorative feature icons (about image placeholder)
 
 ---
@@ -171,14 +168,13 @@ Icon sizes used:
 | `.btn.btn-primary` | Solid accent gradient, glow shadow | Primary CTA |
 | `.btn.btn-ghost` | Transparent, outlined | Secondary action |
 | `.btn.btn-sm` | Smaller padding | Compact contexts (project cards) |
-| `.btn.btn-disabled` | Reduced opacity, no-pointer | Unavailable actions |
 | `.btn-submit` | Full-width, accent gradient | Contact form submit |
 
 ### Cards
 
 | Component | Location | Description |
 |---|---|---|
-| Skill category | `#skills` | Bordered box with progress bars and icon grid |
+| Skills belt | `#skills` | Full-width scrolling skill list |
 | About highlight | `#about` | Small feature box with icon + short text |
 | Hero profile card | `#hero` | Mini card visible on desktop (hidden ≤900px) |
 | Contact link | `#contact` | Social/email row with icon and text |
@@ -239,7 +235,7 @@ The site's depth comes from layered backgrounds:
 | Nav links | `index.html` | `§1 NAVIGATION` comment |
 | Hero heading / CTA | `index.html` | `§2 HERO SECTION` comment |
 | About text & highlights | `index.html` | `#about` section |
-| Skill bar percentages | `index.html` | `data-width="xx"` attributes |
+| Skills list | `index.html` | `#skills-belt-track` items |
 | Project cards | `index.html` | `#projects-dock` articles |
 | Cert cards | `index.html` | `.cert-stack-inner` cards |
 | Contact links | `index.html` | `§6 CONTACT SECTION` comment |

@@ -22,3 +22,12 @@ export function debounce(fn, delay) {
 export function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
+
+export function isLowPowerMode() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const saveData = Boolean(connection?.saveData);
+  const cores = navigator.hardwareConcurrency || 8;
+  const memory = navigator.deviceMemory || 8;
+
+  return saveData || cores <= 4 || memory <= 4;
+}

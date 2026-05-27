@@ -14,7 +14,7 @@
    5. Scroll Reveal   — GSAP-driven reveal classes (.reveal, .reveal-left …)
    6. Layout Utils    — .container, .section-inner, z-index stacking
    7. Typography      — .section-label, .section-title, .gradient-text
-   8. Buttons         — .btn, .btn-primary, .btn-ghost, .btn-sm, .btn-disabled
+   8. Buttons         — .btn, .btn-primary, .btn-ghost, .btn-sm
    9. Tag Pill        — .tag inline code/tech label
    10. Reduced Motion  — Blanket animation override for prefers-reduced-motion
    ─────────────────────────────────────────────────────────────────────────────
@@ -212,6 +212,10 @@ body.loaded .preloader {
   pointer-events: none;
 }
 
+html.no-js .preloader {
+  animation: noJsPreloaderFallback .01s linear 1.2s forwards;
+}
+
 .preloader-inner {
   display: flex;
   flex-direction: column;
@@ -239,6 +243,14 @@ body.loaded .preloader {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes noJsPreloaderFallback {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
@@ -271,10 +283,7 @@ body.loaded .preloader {
    Add class="reveal" / "reveal-left" / "reveal-right" to any element.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Reveal classes are visible by default; GSAP handles the from-state.
-   .revealed kept for pure-CSS fallback when JS is disabled. */
-
-/* Pure CSS fallback (no-JS) */
+/* Reveal classes are visible by default; GSAP handles the from-state. */
 
 .no-js .reveal,
 .no-js .reveal-child,
@@ -383,7 +392,6 @@ section > .section-inner,
    .btn-primary  → solid accent gradient CTA
    .btn-ghost    → outlined/transparent variant
    .btn-sm       → small size modifier
-   .btn-disabled → non-interactive state (aria-disabled="true" in HTML)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .btn {
@@ -432,18 +440,6 @@ section > .section-inner,
 .btn-sm {
   padding: .5rem 1rem;
   font-size: .8rem;
-}
-
-.btn-disabled {
-  cursor: not-allowed;
-  opacity: .68;
-  filter: saturate(.7);
-}
-
-.btn-disabled:hover,
-.btn-disabled:active {
-  transform: none;
-  box-shadow: 0 4px 24px var(--clr-glow);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

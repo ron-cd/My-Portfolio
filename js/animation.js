@@ -9,38 +9,31 @@
  *
  * SECTIONS
  * ────────────────────────────────────────────────────────────────
- * 1. setSkillBarsToFinalWidth() — fallback for reduced-motion / no-GSAP
- * 2. initScrollReveal()         — coordinates all scroll animations:
+ * 1. initScrollReveal()         — coordinates all scroll animations:
  *      a. revealFrom()          — generic enter-from utility
- *      b. Skill bar fills       — width tween on scroll into view
- *      c. Hero entrance         — staggered fade-up of hero elements
- *      d. initCertGallery()     — scroll-pinned card-stack for certs
- *      e. initProjectsDock()    — scroll-pinned hologram project viewer
- * 3. initProjectsDock()         — projects hologram: panel switching,
+ *      b. Hero entrance         — staggered fade-up of hero elements
+ *      c. initCertGallery()     — scroll-pinned card-stack for certs
+ *      d. initProjectsDock()    — scroll-pinned hologram project viewer
+ * 2. initProjectsDock()         — projects hologram: panel switching,
  *                                 dot navigation, GSAP pin + scrub
- * 4. initProjectHologramCanvas()— Three.js WebGL hologram sphere
- * 5. createGlowTexture()        — canvas glow sprite for Three.js
- * 6. initCertGallery()          — GSAP-pinned cert card stack
+ * 3. initProjectHologramCanvas()— Three.js WebGL hologram sphere
+ * 4. createGlowTexture()        — canvas glow sprite for Three.js
+ * 5. initCertGallery()          — GSAP-pinned cert card stack
  */
 'use strict';
 
-import { prefersReducedMotion } from './utils.js';
-
-function setSkillBarsToFinalWidth() {
-  document.querySelectorAll('.skill-fill').forEach(bar => {
-    bar.style.width = (bar.dataset.width || '0') + '%';
-  });
-}
+import { isLowPowerMode, prefersReducedMotion } from './utils.js';
 
 function initScrollReveal() {
   if (prefersReducedMotion()) {
-    setSkillBarsToFinalWidth();
     initCertGallery();
+    initProjectsDock();
     return;
   }
 
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-    setSkillBarsToFinalWidth();
+    initCertGallery();
+    initProjectsDock();
     return;
   }
 
@@ -78,24 +71,6 @@ function initScrollReveal() {
   revealFrom('.reveal-right', compactReveal ? { opacity: 0, y: 22 } : { opacity: 0, x: 44 });
   revealFrom('.reveal-child', { opacity: 0, y: 20 }, { duration: 0.5, stagger: 0.08 });
 
-  gsap.utils.toArray('.skill-fill').forEach(bar => {
-    const rect = bar.getBoundingClientRect();
-    const targetWidth = (bar.dataset.width || '0') + '%';
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      gsap.set(bar, { width: targetWidth });
-      return;
-    }
-    gsap.fromTo(bar,
-      { width: '0%' },
-      {
-        width: targetWidth,
-        duration: 1.4,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: bar, start: 'top 88%', once: true },
-      }
-    );
-  });
-
   initCertGallery();
   initProjectsDock();
 
@@ -127,17 +102,16 @@ function initProjectsDock() {
     c: stage.querySelector('.project-holo-label-c [data-holo-label-c]'),
   };
   const status = stage.querySelector('[data-holo-status]');
-  const icon = stage.querySelector('[data-holo-icon] i');
   const shell = stage.querySelector('[data-holo-shell]');
   const canvas = stage.querySelector('#projects-hologram-canvas');
   const reduceMotion = prefersReducedMotion();
+  const lowPower = isLowPowerMode();
   const compactMedia = window.matchMedia('(max-width: 760px)');
 
   const projects = panels.map((panel, index) => ({
     index,
     color: panel.dataset.holoColor || '#2df8ff',
     accent: panel.dataset.holoAccent || '#00d4aa',
-    icon: panel.dataset.holoIcon || 'fas fa-globe',
     labelA: panel.dataset.holoLabelA || 'Project Core',
     labelB: panel.dataset.holoLabelB || 'Orbit Path',
     labelC: panel.dataset.holoLabelC || 'Telemetry',
@@ -154,7 +128,7 @@ function initProjectsDock() {
     stage,
     shell,
     projects,
-    reduceMotion,
+    reduceMotion: reduceMotion || lowPower,
   });
 
   function setPanelAccessibility(index) {
@@ -195,8 +169,6 @@ function initProjectsDock() {
     if (labels.b) labels.b.textContent = project.labelB;
     if (labels.c) labels.c.textContent = project.labelC;
     if (status) status.textContent = `Mode ${String(nextIndex + 1).padStart(2, '0')}`;
-    if (icon) icon.className = project.icon;
-
     hologram?.setMode(nextIndex, shouldPulse && changed);
     if (shouldPulse && changed) pulseStage();
   }
@@ -326,12 +298,19 @@ function initProjectHologramCanvas({ canvas, stage, shell, projects, reduceMotio
     return null;
   }
 
+  const compactCanvas = window.matchMedia('(max-width: 760px)').matches;
+  const lowPower = isLowPowerMode();
+  if (compactCanvas && lowPower) {
+    stage.classList.add('project-holo-no-webgl');
+    return null;
+  }
+
   let renderer;
   try {
     renderer = new Three.WebGLRenderer({
       canvas,
       alpha: true,
-      antialias: true,
+      antialias: !lowPower,
       powerPreference: 'high-performance',
     });
   } catch (error) {
@@ -344,7 +323,7 @@ function initProjectHologramCanvas({ canvas, stage, shell, projects, reduceMotio
   camera.position.set(0, .25, 7);
 
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5));
 
   const root = new Three.Group();
   const core = new Three.Group();
@@ -404,13 +383,13 @@ function initProjectHologramCanvas({ canvas, stage, shell, projects, reduceMotio
     depthWrite: false,
   });
 
-  const coreGeometry = new Three.SphereGeometry(1.42, 56, 28);
+  const coreGeometry = new Three.SphereGeometry(1.42, lowPower ? 36 : 52, lowPower ? 18 : 26);
   core.add(new Three.Mesh(coreGeometry, shellMaterial));
   core.add(new Three.Mesh(coreGeometry, wireMaterial));
 
   [-1.12, -.84, -.56, -.28, 0, .28, .56, .84, 1.12].forEach(y => {
     const radius = Math.sqrt(Math.max(0.08, 1.42 * 1.42 - y * y));
-    const latitude = new Three.Mesh(new Three.TorusGeometry(radius, .0045, 6, 112), lineMaterial);
+    const latitude = new Three.Mesh(new Three.TorusGeometry(radius, .0045, 6, lowPower ? 72 : 112), lineMaterial);
     latitude.rotation.x = Math.PI / 2;
     latitude.position.y = y;
     latitudeGroup.add(latitude);
@@ -421,12 +400,12 @@ function initProjectHologramCanvas({ canvas, stage, shell, projects, reduceMotio
     { radius: 2.08, rotation: [Math.PI / 2, .65, .32] },
     { radius: 2.34, rotation: [Math.PI / 1.8, -.34, -.18] },
   ].forEach(config => {
-    const ring = new Three.Mesh(new Three.TorusGeometry(config.radius, .006, 8, 160), lineMaterial);
+    const ring = new Three.Mesh(new Three.TorusGeometry(config.radius, .006, 8, lowPower ? 96 : 150), lineMaterial);
     ring.rotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
     ringGroup.add(ring);
   });
 
-  const particleCount = 420;
+  const particleCount = lowPower ? 180 : 360;
   const basePositions = new Float32Array(particleCount * 3);
   const burstWeights = new Float32Array(particleCount);
   const particlePhases = new Float32Array(particleCount);
@@ -456,7 +435,7 @@ function initProjectHologramCanvas({ canvas, stage, shell, projects, reduceMotio
   particleGeometry.setAttribute('position', new Three.BufferAttribute(particlePositions, 3));
   core.add(new Three.Points(particleGeometry, particleMaterial));
 
-  const nodeGeometry = new Three.SphereGeometry(.045, 14, 14);
+  const nodeGeometry = new Three.SphereGeometry(.045, lowPower ? 10 : 14, lowPower ? 10 : 14);
   for (let i = 0; i < 8; i++) {
     const node = new Three.Mesh(nodeGeometry, nodeMaterial);
     node.userData = {

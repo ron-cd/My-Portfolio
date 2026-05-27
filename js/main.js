@@ -12,8 +12,7 @@
  * 1. initNavbar()       — scroll-glass nav, hamburger, active link
  * 2. initScrollProgress()— top-of-page progress bar
  * 3. initSkillsBelt()   — clones skill items for seamless CSS loop
- * 4. initContactForm()  — client-side validation (no backend yet)
- *                         See docs/DEPLOYMENT.md to wire a service
+ * 4. initContactForm()  — client-side validation + static form POST
  * 5. initTyping()       — typewriter role-text cycle in the hero
  * 6. initCursorGlow()   — desktop-only mouse-following glow
  * 7. initHeroMotion()   — GSAP parallax on hero ambient layers
@@ -22,7 +21,7 @@
 
 'use strict';
 
-import { lerp, prefersReducedMotion } from './utils.js';
+import { isLowPowerMode, lerp, prefersReducedMotion } from './utils.js';
 import { scrollTracker }                         from './scroll.js';
 import { initScrollReveal } from './animation.js';
 
@@ -190,6 +189,17 @@ function initContactForm() {
     return valid;
   }
 
+  function setSubmitButton(iconClass, label) {
+    const icon = document.createElement('i');
+    icon.className = iconClass;
+    icon.setAttribute('aria-hidden', 'true');
+    btn.replaceChildren(icon, document.createTextNode(label));
+  }
+
+  function resetSubmitButton() {
+    setSubmitButton('fas fa-paper-plane', 'Send Message');
+  }
+
   Object.values(fields).forEach(input => {
     input?.addEventListener('input', () => {
       if (input.getAttribute('aria-invalid') === 'true') validate();
@@ -205,8 +215,7 @@ function initContactForm() {
       return;
     }
 
-    const original = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Sending...';
+    setSubmitButton('fas fa-circle-notch fa-spin', 'Sending...');
     btn.disabled = true;
 
     try {
@@ -219,14 +228,13 @@ function initContactForm() {
 
       if (!response.ok) throw new Error(`Netlify form post failed: ${response.status}`);
 
-      btn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Message Sent';
+      setSubmitButton('fas fa-check', 'Message Sent');
       btn.classList.add('sent');
       form.reset();
       Object.keys(fields).forEach(field => setError(field, ''));
       setStatus('Thanks. Your message was sent.', 'success');
-    } catch (error) {
-      console.error(error);
-      btn.innerHTML = original;
+    } catch {
+      resetSubmitButton();
       btn.classList.remove('sent');
       btn.disabled = false;
       setStatus('Message could not be sent. Please email me directly.', 'error');
@@ -234,7 +242,7 @@ function initContactForm() {
     }
 
     setTimeout(() => {
-      btn.innerHTML = original;
+      resetSubmitButton();
       btn.classList.remove('sent');
       btn.disabled = false;
       setStatus('');
@@ -292,24 +300,34 @@ function initTyping() {
    Soft radial gradient that follows the mouse with lag
    ============================================================ */
 function initCursorGlow() {
-  if (window.innerWidth < 768 || prefersReducedMotion()) return;
+  if (window.innerWidth < 1024 || prefersReducedMotion() || isLowPowerMode()) return;
 
   const glow = document.createElement('div');
   glow.className = 'cursor-glow';
   document.body.appendChild(glow);
 
   let mx = 0, my = 0, cx = 0, cy = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  let frame = 0;
+  let lastFrameTime = 0;
 
-  (function animateGlow() {
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+
+  (function animateGlow(now = 0) {
+    frame = requestAnimationFrame(animateGlow);
+    if (document.hidden || now - lastFrameTime < 33) return;
+    lastFrameTime = now;
     cx = lerp(cx, mx, 0.09);
     cy = lerp(cy, my, 0.09);
     glow.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
-    requestAnimationFrame(animateGlow);
   })();
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(frame);
+    else frame = requestAnimationFrame(animateGlow);
+  });
+
   // Grow on interactive elements
-  document.querySelectorAll('a, button, .project-card, .skill-icon').forEach(el => {
+  document.querySelectorAll('a, button, .project-holo-panel').forEach(el => {
     el.addEventListener('mouseenter', () => glow.classList.add('cursor-glow--hover'));
     el.addEventListener('mouseleave', () => glow.classList.remove('cursor-glow--hover'));
   });
@@ -367,6 +385,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initTyping();
   initCursorGlow();
   initHeroMotion();
-  // Remove preloader
-  setTimeout(() => document.body.classList.add('loaded'), 600);
 });

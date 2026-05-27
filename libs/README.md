@@ -1,17 +1,13 @@
 # libs/ - Local Library Files
 
-This folder must contain these 4 files before the portfolio will work locally.
+This folder contains the vendor libraries loaded directly by the static HTML pages. Keep these files committed so the portfolio does not depend on npm or a CDN at runtime.
 
 ## Download Script
 
-Run one of the root-level scripts from inside the project folder:
+Run the root-level PowerShell script from inside the project folder:
 
 ```powershell
 PowerShell -ExecutionPolicy Bypass -File download-libs.ps1
-```
-
-```bash
-bash download-libs.sh
 ```
 
 ## Manual Download
@@ -27,8 +23,8 @@ bash download-libs.sh
 
 ```text
 libs/
-├── gsap.min.js
-├── ScrollTrigger.min.js
-├── three.min.js
-└── OBJLoader.js
+|-- gsap.min.js
+|-- ScrollTrigger.min.js
+|-- three.min.js
+`-- OBJLoader.js
 ```

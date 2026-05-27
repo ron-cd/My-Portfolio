@@ -10,7 +10,11 @@ This portfolio is a static site — no build step, no server runtime. Drop the f
 2. Go to **Settings → Pages**.
 3. Set the source to the `main` branch, root folder `/`.
 4. GitHub Pages will serve `index.html` automatically.
-5. Update the canonical URL and OG tags in `index.html`:
+5. The current default project URL is:
+   ```text
+   https://ron-cd.github.io/My-Portfolio/
+   ```
+6. If the repository name or domain changes, update the canonical URL, OG tags, `robots.txt`, and `sitemap.xml`:
    ```html
    <link rel="canonical" href="https://your-username.github.io/" />
    <meta property="og:url" content="https://your-username.github.io/" />
@@ -80,8 +84,9 @@ The contact form is already wired for Netlify Forms:
 
 ## Assets Checklist Before Launch
 
-- [ ] Replace `assets/images/og-image.png` with a real 1200×630px social preview image.
-- [ ] Replace `assets/Aaron-Dela-Cruz-CV.pdf` with your actual CV.
+- [ ] Run `npm test`.
+- [ ] Replace `assets/img/og-image.png` with a real 1200x630px social preview image.
+- [ ] Replace `assets/Aaron_Dela_Cruz_CV.pdf` with your actual CV.
 - [ ] Update `robots.txt` if you want to disallow any paths.
 - [ ] Update `sitemap.xml` with your real domain.
 - [ ] Verify `canonical` and OG/Twitter meta tags point to the correct URL.
@@ -92,8 +97,8 @@ The contact form is already wired for Netlify Forms:
 
 ## Performance Notes
 
-- **Fonts** are loaded with `<link rel="preload">` and `onload="this.rel='stylesheet'"` for non-blocking async loading.
-- **Font Awesome** is also preloaded the same way.
+- **Fonts** are loaded from `css/base.css` with preconnect hints in each page head.
+- **Font Awesome** is loaded as an SRI-protected stylesheet with `referrerpolicy="no-referrer"`.
 - **Three.js** and **GSAP** libs are served from `libs/` (local copies), avoiding CDN latency.
 - **`three.min.js`** and **`OBJLoader.js`** use `defer` to avoid blocking the parser.
-- The satellite `.obj` model and textures are ~3MB combined. If initial load is slow on mobile, consider reducing texture resolution or lazy-loading the satellite canvas after the first user interaction.
+- The satellite `.obj` model and textures are skipped on compact, reduced-motion, save-data, and constrained devices.

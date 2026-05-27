@@ -4,6 +4,17 @@ All notable changes are documented here.
 
 ## [Unreleased] — May 2026
 
+### Fixed
+- Corrected the Lab Activities route to `html/lab-activities.html` and fixed nested-page asset paths.
+- Aligned canonical, Open Graph, robots, sitemap, and web manifest URLs for the GitHub Pages project URL.
+- Replaced stale package checks with `scripts/check-static-site.js`.
+- Normalized satellite waypoint profiles so ScrollTrigger refreshes safely across breakpoints.
+
+### Removed
+- Removed unused skill-bar CSS and JS after the skills section moved to the belt carousel.
+- Removed unused hologram icon-core markup hooks and CSS.
+- Removed unused npm runtime dependencies; the site uses committed files in `libs/`.
+
 ### Removed (Dead Code Cleanup)
 - **`css/sections.css`** — Removed entire old `project-card` / `project-dock-grid` layout system (~300 lines). This was the original grid-based projects layout, fully superseded by the hologram projection interface in January 2026 but never deleted.
 - **`css/sections.css`** — Removed duplicate `.hero-ambient-drift` stub rule that was being silently overridden by the full rule 50 lines below it.

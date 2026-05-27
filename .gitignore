@@ -23,6 +23,11 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 
+# Local Codex tooling
+.codex/
+__pycache__/
+*.py[cod]
+
 # ─── Build output (if you add a bundler later) ───
 dist/
 build/

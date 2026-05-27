@@ -1,5 +1,5 @@
 {
-  "name": "aaron-portfolio-modified",
+  "name": "my-portfolio",
   "version": "1.0.0",
   "description": "Responsive space-themed portfolio with a Three.js satellite, GSAP scroll motion, and vanilla HTML/CSS/JS.",
   "main": "index.html",
@@ -7,15 +7,11 @@
     "doc": "docs"
   },
   "scripts": {
-    "check": "node -e \"const fs=require('fs'); ['index.html','css/base.css','css/space.css','css/sections.css','js/main.js','js/animation.js','js/satellite.js'].forEach(f=>{if(!fs.existsSync(f)) throw new Error('Missing '+f)}); console.log('Static asset check passed')\"",
+    "check": "node scripts/check-static-site.js",
+    "serve": "node scripts/serve-static.js",
     "test": "npm run check"
   },
   "keywords": ["portfolio", "threejs", "gsap", "responsive", "space"],
   "author": "Aaron Dela Cruz",
-  "license": "MIT",
-  "type": "module",
-  "dependencies": {
-    "gsap": "3.15.0",
-    "three": "0.184.0"
-  }
+  "license": "MIT"
 }

@@ -1,18 +1,29 @@
 /**
  * satellite.js — Three.js OBJ satellite on a GSAP scroll-driven path
  * The canvas is position:fixed, moved across viewport via GSAP ScrollTrigger.
- * The Three.js model auto-rotates inside and reacts to mouse/touch drag.
+ * The Three.js model auto-rotates inside a decorative, pointer-safe layer.
  *
- * SETUP: Put your model in assets/satellite/satellite.obj
+ * SETUP: Put your model in assets/satellite/Satellite.obj
  * Edit OBJ_PATH below if your filename differs.
  */
 'use strict';
 
 const OBJ_PATH        = 'assets/satellite/Satellite.obj';
-const CANVAS_SIZE     = 900;
+const CANVAS_SIZE     = 760;
 const CAMERA_Z        = 3.2;
 const AUTO_ROTATE_SPD = 220; // Higher number = slower idle spin.
 const SCRUB_SPEED     = 1.8;
+
+function shouldDisableSatellite() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const compact = window.matchMedia('(max-width: 760px)').matches;
+  const saveData = Boolean(connection?.saveData);
+  const cores = navigator.hardwareConcurrency || 8;
+  const memory = navigator.deviceMemory || 8;
+
+  return reduceMotion || compact || saveData || cores <= 4 || memory <= 4;
+}
 
 /*
  * Scroll waypoints are expressed as viewport fractions so the satellite can
@@ -23,11 +34,10 @@ const WAYPOINTS = {
   desktop: [
     { p: 0.00, x: 0.64, y: 0.45, rotZ:  -1, scale: 1.58 },
     { p: 0.15, x: 0.80, y: 0.30, rotZ:  -8, scale: 0.78 },
-    { p: 0.40, x: 0.15, y: 0.28, rotZ: -72, scale: 0.66 },
-    { p: 0.60, x: 0.88, y: 0.70, rotZ: -52, scale: 1.72 },
-    { p: 1.00, x: -0.48, y: 0.66, rotZ:  90, scale: 1.58 },
-    { p: 1.00, x: 0.50, y: 1.50, rotZ:   0, scale: 1.50 },
-    { p: 1.20, x: 0.52, y: 0.75, rotZ:   0, scale: 1.50 },
+    { p: 0.30, x: 0.15, y: 0.28, rotZ: -72, scale: 1.26 },
+    { p: 0.60, x: 0.88, y: 0.70, rotZ: -52, scale: 1.28 },
+    { p: 0.80, x: -0.26, y: 0.64, rotZ:  0, scale: 1.02 },
+    { p: 1.00, x: 0.52, y: 0.75, rotZ:   0, scale: 1.18 },
   ],
   tablet: [
     { p: 0.00, x: 0.66, y: 0.42, rotZ:  -1, scale: 0.82 },
@@ -52,15 +62,20 @@ class SatelliteViewer {
     this.canvas = document.getElementById('sat-canvas');
     this.loader = document.getElementById('sat-loader');
     if (!this.canvas) return;
+    if (shouldDisableSatellite()) {
+      this.canvas.hidden = true;
+      if (this.loader) this.loader.hidden = true;
+      return;
+    }
     if (typeof THREE === 'undefined') {
-      console.warn('[satellite.js] Three.js not found.');
+      this.canvas.hidden = true;
+      if (this.loader) this.loader.hidden = true;
       return;
     }
     this.renderer = null; this.scene = null; this.camera = null; this.model = null;
-    this._autoRot = true; this._dragging = false;
-    this._prevMouse = { x: 0, y: 0 };
     this._rot = { x: -0.18, y: 0.5 };
     this._tgtRot = { x: -0.18, y: 0.5 };
+    this._fallbackMaterial = null;
 
     this._setupCanvas();
     this._setupRenderer();
@@ -88,7 +103,6 @@ class SatelliteViewer {
       width: CANVAS_SIZE + 'px', height: CANVAS_SIZE + 'px',
       zIndex: '1', pointerEvents: 'none',
       transform: `translate(${x}px,${y}px) translate(-50%,-50%) rotate(${wp0.rotZ}deg) scale(${wp0.scale})`,
-      cursor: 'grab',
       filter: 'drop-shadow(0 0 24px rgba(77,166,255,0.4)) drop-shadow(0 8px 32px rgba(0,0,0,0.6))',
     });
     if (this.loader) {
@@ -105,14 +119,14 @@ class SatelliteViewer {
   }
 
   _setupRenderer() {
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, alpha: true });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.renderer.setSize(CANVAS_SIZE, CANVAS_SIZE);
     this.renderer.outputEncoding          = THREE.sRGBEncoding;
     this.renderer.physicallyCorrectLights = true;
     this.renderer.toneMapping             = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure     = 1.5;
-    this.renderer.shadowMap.enabled       = true;
+    this.renderer.shadowMap.enabled       = false;
     this.renderer.shadowMap.type          = THREE.PCFSoftShadowMap;
   }
 
@@ -126,8 +140,7 @@ class SatelliteViewer {
   _setupLights() {
     this.scene.add(new THREE.AmbientLight(0x334466, 0.7));
     const sun = new THREE.DirectionalLight(0xfff6e8, 4.0);
-    sun.position.set(-3, 4, 3); sun.castShadow = true;
-    sun.shadow.mapSize.setScalar(2048);
+    sun.position.set(-3, 4, 3);
     this.scene.add(sun);
     const rim = new THREE.DirectionalLight(0x4488ff, 1.4);
     rim.position.set(5, -1, -4);
@@ -157,7 +170,8 @@ class SatelliteViewer {
     obj.position.sub(center.multiplyScalar(2.0 / maxDim));
     obj.traverse(child => {
       if (!child.isMesh) return;
-      child.castShadow = child.receiveShadow = true;
+      child.castShadow = false;
+      child.receiveShadow = false;
       if (!child.material?.map) this._fallbackMat(child);
     });
     this.model = obj;
@@ -168,10 +182,14 @@ class SatelliteViewer {
       setTimeout(() => { if (this.loader) this.loader.style.display = 'none'; }, 500);
     }
     this.canvas.style.pointerEvents = 'none';
-    console.info('[satellite.js] Model loaded.');
   }
 
   _fallbackMat(mesh) {
+    if (this._fallbackMaterial) {
+      mesh.material = this._fallbackMaterial;
+      return;
+    }
+
     const tl = new THREE.TextureLoader();
     const diffuse  = tl.load('assets/satellite/textures/BaseColor.jpg');
     const normal   = tl.load('assets/satellite/textures/Normal.jpg');
@@ -179,11 +197,12 @@ class SatelliteViewer {
     diffuse.encoding = THREE.sRGBEncoding;
 
     // The asset ships as OBJ-only, so we assign the PBR maps manually.
-    mesh.material = new THREE.MeshStandardMaterial({
+    this._fallbackMaterial = new THREE.MeshStandardMaterial({
       map: diffuse, normalMap: normal,
       metalnessMap: metRough, roughnessMap: metRough,
       metalness: 0.8, roughness: 0.35,
     });
+    mesh.material = this._fallbackMaterial;
   }
 
   _showFallback() {
@@ -281,9 +300,7 @@ class SatelliteViewer {
   _loop() {
     this.raf = requestAnimationFrame(() => this._loop());
     if (!this.model) { this.renderer.render(this.scene, this.camera); return; }
-    if (this._autoRot && !this._dragging) {
-      this._tgtRot.y += 1 / AUTO_ROTATE_SPD;
-    }
+    this._tgtRot.y += 1 / AUTO_ROTATE_SPD;
 
     this._rot.x += (this._tgtRot.x - this._rot.x) * 0.08;
     this._rot.y += (this._tgtRot.y - this._rot.y) * 0.08;
@@ -295,19 +312,10 @@ class SatelliteViewer {
 
   _bindEvents() {
     window.addEventListener('resize', () => this.renderer.setSize(CANVAS_SIZE, CANVAS_SIZE), { passive: true });
-    this.canvas.addEventListener('mousedown', e => this._dragStart(e));
-    window.addEventListener('mousemove',  e => this._dragMove(e));
-    window.addEventListener('mouseup',    () => this._dragEnd());
-    this.canvas.addEventListener('touchstart', e => this._dragStart(e.touches[0]), { passive: true });
-    window.addEventListener('touchmove',  e => this._dragMove(e.touches[0]), { passive: true });
-    window.addEventListener('touchend',   () => this._dragEnd());
   }
-  _dragStart(e) { this._dragging = true; this._autoRot = false; this._prevMouse = { x: e.clientX, y: e.clientY }; this.canvas.style.cursor = 'grabbing'; }
-  _dragMove(e)  { if (!this._dragging) return; this._tgtRot.y += (e.clientX - this._prevMouse.x) * 0.009; this._tgtRot.x += (e.clientY - this._prevMouse.y) * 0.009; this._prevMouse = { x: e.clientX, y: e.clientY }; }
-  _dragEnd()    { this._dragging = false; this.canvas.style.cursor = 'grab'; setTimeout(() => { this._autoRot = true; }, 2500); }
 }
 
 window.addEventListener('load', () => {
-  if (typeof THREE === 'undefined') { console.warn('[satellite.js] Three.js not loaded.'); return; }
+  if (typeof THREE === 'undefined') return;
   new SatelliteViewer();
 });

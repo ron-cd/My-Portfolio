@@ -16,7 +16,7 @@ Most copy and links live in `index.html`. Search and replace:
 | `linkedin.com/in/aaron-delacruz` | Your LinkedIn URL |
 | `twitter.com/aarondev` | Your Twitter/X handle |
 | `Mabalacat City` | Your city |
-| `assets/Aaron-Dela-Cruz-CV.pdf` | Path to your CV file |
+| `assets/Aaron_Dela_Cruz_CV.pdf` | Path to your CV file |
 | `AKDC` | Your initials (footer wordmark) |
 
 Also update SEO meta tags near the top of `index.html`:
@@ -24,7 +24,7 @@ Also update SEO meta tags near the top of `index.html`:
 ```html
 <link rel="canonical" href="https://your-domain.com/" />
 <meta property="og:url"   content="https://your-domain.com/" />
-<meta property="og:image" content="assets/images/og-image.png" />
+<meta property="og:image" content="assets/img/og-image.png" />
 ```
 
 ---
@@ -37,7 +37,7 @@ All design values are in `css/base.css` under `:root`. Change these first before
 /* Brand colours — edit these */
 --clr-accent:   #64b5f6;   /* primary highlight: links, bars, borders */
 --clr-accent-2: #7d719d;   /* secondary accent: gradients, alt buttons */
---clr-accent-3: #00d4aa;   /* tertiary accent: skill bars, cert links */
+--clr-accent-3: #00d4aa;   /* tertiary accent: cert links and supporting glows */
 --clr-bg:       #060912;   /* main background */
 --clr-bg-deep:  #02050b;   /* deepest background (body) */
 
@@ -76,12 +76,13 @@ Breakpoints are defined in `css/sections.css` (in the responsive hardening secti
 Edit `js/satellite.js`. Three waypoint profiles control the satellite's position as the user scrolls:
 
 ```js
-WAYPOINTS.desktop  // ≥ 901px
-WAYPOINTS.tablet   // 641–900px
-WAYPOINTS.mobile   // ≤ 640px
+WAYPOINTS.desktop  // above 1100px
+WAYPOINTS.tablet   // 641px to 1100px
+WAYPOINTS.mobile   // 640px and below, kept as a fallback profile
 ```
 
 **Rule:** All profiles must have the same number of waypoints with the same `p` values.
+The satellite is hidden on compact, save-data, reduced-motion, and constrained devices for performance.
 
 ```js
 // Waypoint shape
@@ -96,15 +97,15 @@ WAYPOINTS.mobile   // ≤ 640px
 
 ---
 
-## Skill Bars
+## Skills Belt
 
-Bars read their target width from a data attribute:
+Skills are listed as `.skill-belt-item` elements inside `#skills-belt-track` in `index.html`.
 
 ```html
-<div class="skill-fill" data-width="90"></div>
+<span class="skill-belt-item">JavaScript ES6+</span>
 ```
 
-Update both the visible percentage label and the `data-width` value to match.
+Add, remove, or reorder those items directly. `js/main.js` clones the list once at runtime so the marquee loops cleanly.
 
 ---
 
@@ -116,7 +117,6 @@ Each project is an `<article class="project-holo-panel">` inside `#projects-dock
 2. Update these `data-*` attributes on the article:
    - `data-holo-color` — hex colour for the hologram sphere
    - `data-holo-accent` — secondary hex colour
-   - `data-holo-icon` — FontAwesome class (e.g. `fas fa-globe`)
    - `data-holo-label-a/b/c` — three hologram display labels
 3. Update the kicker text (`01 / 04`), title, description, metadata, tags, and buttons.
 4. Add a matching dot button in `.project-holo-progress`:
