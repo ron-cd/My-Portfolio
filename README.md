@@ -1,110 +1,87 @@
-# Aaron Dela Cruz - Space Portfolio
+# PLAYER ONE: A Developer Quest
 
-Responsive personal portfolio built with vanilla HTML, CSS, JavaScript, GSAP, and Three.js. The site ships as static files and is ready for GitHub Pages, Netlify, Vercel, or any static host.
+A retro 16-bit RPG portfolio for Aaron Dela Cruz. Visitors start at a pixel-art title screen, press Start, and land straight in a full-screen village (there is no main menu). Every building is one screen: **Profile** (an equipment screen), **Skill Tree** (certifications as a radial tree), **Quest Log** (projects as an open book), **Achievements** (a badge wall), and **Contact** (a post office letter). The camera follows the hero.
 
-## What Ships
+In a hurry? **Skip the game** on the title screen (or open `#/summary`) shows a plain one-page summary with a CV button and a print stylesheet.
+
+It is plain HTML, CSS, and ES modules. No framework, no bundler, no runtime dependencies, and no build step, so it deploys to GitHub Pages as-is.
 
 ![Preview](assets/img/og-image.png)
 
-- Full-screen animated space background on canvas
-- Three.js OBJ satellite with responsive scroll path, auto-rotation, and drag rotation
-- GSAP ScrollTrigger reveal animations, certifications stack, and projects hologram
-- Responsive hero, skills, certifications, projects, contact, and poster-style footer
-- Mobile navigation and touch-friendly project browsing
-- Lab Activities archive page under `html/lab-activities.html`
-- Static deployment model with no build step
+## Run it
 
-## Project Structure
+Use a local server (ES modules do not load from `file://`).
+
+```bash
+npm run serve        # http://127.0.0.1:4173/
+npm run serve -- 8080
+npm test             # file checks + content validation
+```
+
+## Controls
+
+| Input | Action |
+|---|---|
+| Enter / Space / click | Press Start on the title screen |
+| Arrow Up / Down | Move through quest lists and the places drawer |
+| Arrow keys / Tab | Move between skill-tree nodes and achievement badges |
+| Q / E | Swap skill-tree branch |
+| Arrow keys or W A S D (village) | Walk one tile per key press (holding a key does not repeat); stepping onto a door opens it |
+| Enter / Space | Open the focused item; in the village, go into the nearest building |
+| L | In the village, open the list of places |
+| Esc | Close a detail panel or the places drawer, or go back one screen (in the village it never leaves) |
+| Gear button (top right) | Options (see below) |
+| Sound button (top right) | Turn optional sound effects on (off by default) |
+
+**Options** (gear button): sound effects, **music** (original chiptune, off by default: Cozy Village in the village, and a morning, afternoon or night tune elsewhere), scanlines, **larger text**, **readable font**, **high contrast**, **calm motion**, always-night, and reset explored areas. All are remembered in the browser only.
+
+On the title screen you can also click (or Tab to) the cat, the hero, and the terminal; the terminal opens Contact.
+
+Everything also works with mouse and touch, and with reduced-motion enabled.
+
+## Editing content
+
+All content lives in `js/data/`. You never need to touch UI code to update it:
+
+| File | Controls |
+|---|---|
+| `profile.js` | Profile screen and hub status panel |
+| `certifications.js` | Skill-tree nodes, positions, connections, status, credential links |
+| `projects.js` | Quest log entries |
+| `achievements.js` | Manual achievements (certifications and completed quests are added automatically) |
+| `site.js` | Title text, building list, contact links, CV path |
+| `world.js` | The village map (32 × 20): roads, building positions, doors, trees, lamps, lake |
+
+Run `npm test` after editing. It catches broken connections, duplicate ids, non-HTTPS links, missing files, unreachable village doors, and an out-of-date no-JS fallback.
+
+After changing `profile.js`, `site.js`, certifications, projects or achievements, run `npm run seo` to regenerate the search-engine data (JSON-LD) and the no-JavaScript fallback in `index.html` from the same files. See [docs/CUSTOMISATION.md](docs/CUSTOMISATION.md) for step-by-step recipes.
+
+## Project structure
 
 ```text
-.
-|-- index.html
-|-- html/
-|   `-- lab-activities.html
-|-- css/
-|   |-- base.css       # Tokens, reset, global utilities
-|   |-- space.css      # Fixed background and satellite loader styles
-|   |-- sections.css   # Navbar, sections, cards, footer, responsive rules
-|   `-- lab-activities.css
-|-- js/
-|   |-- boot.js        # Preloader and footer year
-|   |-- main.js        # App boot and UI systems
-|   |-- animation.js   # GSAP reveals, cert stack, and projects hologram
-|   |-- satellite.js   # Three.js satellite model and scroll path
-|   |-- space-bg.js    # Animated star/nebula canvas
-|   |-- scroll.js      # Scroll progress and active section tracking
-|   `-- utils.js       # Small shared helpers
-|-- assets/
-|   |-- satellite/
-|   `-- icons/
-|-- libs/              # Local GSAP, ScrollTrigger, Three.js, OBJ/MTL loaders
-|-- scripts/
-|   |-- check-static-site.js
-|   `-- serve-static.js
-`-- docs/
+index.html              App shell + no-JS fallback
+css/                    tokens, base, components, shell, title, screens, skilltree, book, badges, extras, summary, world, comfort
+js/main.js              Shell: routing, transitions, focus, global keys
+js/boot.js              tiny pre-paint script (marks JS as available)
+js/core/                dom, router, sprites, scene (pixel background), audio, music, settings, worldmap
+js/scenes/              title, profile, skilltree, quests, achievements, contact, summary, world
+js/ui/                  components, options window, quest-book art, badge art, scene hot-spots, village art
+js/data/                All editable content
+assets/fonts/           Self-hosted Press Start 2P and IBM Plex Sans (OFL)
+assets/                 CV, icons, social image
+html/                   Original standalone lab activity pages
+scripts/                serve-static.js, check-static-site.js, validate-data.mjs, build-seo.mjs
+docs/                   Architecture, customisation, design, deployment, changelog
 ```
 
-## Local Development
+## Docs
 
-Use a local server. ES modules and model assets should not be opened via `file://`.
-
-```bash
-npm test
-npm run serve
-```
-
-The default local URL is `http://127.0.0.1:4173/`. To use another port:
-
-```bash
-npm run serve -- 8080
-```
-
-## Production Checklist
-
-- Confirm the production URL is `https://ron-cd.github.io/My-Portfolio/` or update canonical, Open Graph, `robots.txt`, and `sitemap.xml`
-- Confirm `assets/Aaron_Dela_Cruz_CV.pdf` exists or update the CV link
-- Confirm project URLs and the Lab Activities archive link work
-- Run `npm test`
-- Test Chrome, Firefox, Safari, iOS Safari, and Android Chrome
-- Run Lighthouse and fix any accessibility or performance regressions
-- Deploy on Netlify and confirm contact submissions appear under **Forms**
-
-## Customizing The Satellite
-
-Edit `js/satellite.js`.
-
-- `WAYPOINTS.desktop`, `WAYPOINTS.tablet`, and `WAYPOINTS.mobile` control position, rotation, and scale.
-- `AUTO_ROTATE_SPD` controls idle spin speed. Higher values spin more slowly.
-- `OBJ_PATH` points to the satellite model.
-
-Waypoint values:
-
-```js
-{ p: 0.40, x: 0.12, y: 0.38, rotZ: -72, scale: 0.66 }
-```
-
-- `p`: page scroll progress, from `0` to `1`
-- `x`: viewport width fraction
-- `y`: viewport height fraction
-- `rotZ`: canvas tilt in degrees
-- `scale`: transform scale for the fixed satellite canvas
-
-## Responsive Notes
-
-The main responsive rules live near the end of `css/sections.css` in the "Production responsive hardening" block. Keep new overrides there when the change is meant to protect layouts across breakpoints.
-
-Primary breakpoints:
-
-- `1440px+`: wide desktop polish
-- `1200px`: laptop and tablet landscape
-- `900px`: tablet portrait
-- `640px`: mobile
-- `420px`: very small phones
-
-## Deployment
-
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for GitHub Pages, Netlify, Vercel, custom domain, and security header notes.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Customisation](docs/CUSTOMISATION.md)
+- [Design reference](docs/DESIGN.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Changelog](docs/CHANGELOG.md)
 
 ## License
 
-MIT
+MIT. Fonts are licensed under the SIL Open Font License (see `assets/fonts/`).

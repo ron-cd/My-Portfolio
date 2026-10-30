@@ -1,0 +1,76 @@
+/* =============================================================================
+   tokens.css — Design tokens and font loading for PLAYER ONE.
+   Change colours, fonts, and the base "pixel" size here. Nothing else in the
+   stylesheets hard-codes a palette colour.
+   ============================================================================= */
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../assets/fonts/press-start-2p-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('../assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('../assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Midnight surfaces */
+  --void: #070b16;       /* page / deepest background */
+  --night: #0d1426;      /* inset areas */
+  --panel: #121b33;      /* window background */
+  --panel-2: #1a2646;    /* title bars, raised rows */
+  --line: #32456f;       /* light window border */
+  --ink: #0a0e1a;        /* outer border / outlines */
+
+  /* Accents */
+  --teal: #2bb5a0;
+  --teal-dim: #187064;   /* 4.7:1 against --cream (text on buttons) */
+  --green: #3aa05a;
+  --green-dim: #1f6b3a;
+  --gold: #e8b84a;       /* earned / achievements */
+  --gold-dim: #a8762a;
+  --red: #d9534f;        /* warnings / unavailable */
+  --red-deep: #b8403c;   /* white text on red (5.4:1) */
+  --orange: #e07b39;
+
+  /* Text */
+  --cream: #efe6cf;
+  --pale: #c3cbdb;
+  --muted: #98a4bf;
+
+  /* Type */
+  --font-pixel: 'Press Start 2P', 'Courier New', monospace;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* The base "game pixel". Borders and shadows are multiples of this. */
+  --px: 4px;
+  --hud-h: 60px;
+  --content-max: 1200px;
+
+  /* Comfort options (see comfort.css): every px font size is multiplied by this. */
+  --ts-big: 1;
+  --ts-read: 1;
+  --type-scale: calc(var(--ts-big) * var(--ts-read));
+}
+
+@media (max-width: 640px) {
+  :root {
+    --px: 3px;
+    --hud-h: 54px;
+  }
+}

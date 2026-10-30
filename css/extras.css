@@ -1,0 +1,357 @@
+/* =============================================================================
+   extras.css — The "more unique" layer: options window, scanlines, pixel cursor,
+   living background (clouds, shooting star, cat, hero walk), blinking portrait,
+   and the skill-tree power-on intro.
+   Everything here is decoration or a progressive enhancement; reduced-motion
+   users get the final state with no animation (see base.css).
+   ============================================================================= */
+
+/* ── HUD: options + sound on the right ─────────────────────── */
+
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hud-icon {
+  justify-content: center;
+  min-width: 40px;
+  padding: 8px;
+}
+
+.hud-icon .sprite {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 520px) {
+  .hud-title { display: none; }
+  .hud { gap: 4px; }
+}
+
+/* ── Options window (modal) ────────────────────────────────── */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal[hidden] { display: none; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 14, 0.8);
+}
+
+.modal-win {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  animation: pop 160ms steps(3, end) backwards;
+}
+
+body.modal-open { overflow: hidden; }
+
+.option-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: calc(100% - var(--px) * 2);
+  min-height: 48px;
+  margin: var(--px);
+  padding: 10px 14px;
+  background: var(--panel-2);
+  border: 0;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: calc(11px * var(--type-scale));
+  letter-spacing: 0.06em;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--line),
+    0 var(--px) 0 0 var(--line),
+    calc(var(--px) * -1) 0 0 0 var(--line),
+    var(--px) 0 0 0 var(--line);
+}
+
+.switch:hover { background: var(--line); }
+
+.switch-state {
+  min-width: 52px;
+  padding: 6px 8px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--night);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.switch[aria-checked='true'] .switch-state {
+  color: var(--ink);
+  background: var(--teal);
+}
+
+.switch-hint {
+  margin: 10px 4px 0;
+  font-size: 0.875rem;
+}
+
+.option-reset {
+  margin-bottom: 14px;
+}
+
+.option-reset .switch-hint { margin-top: 10px; }
+
+/* ── Scanlines (optional) ──────────────────────────────────── */
+
+html.crt-on::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.32) 100%);
+}
+
+
+/* ── Pixel cursor (generated from the "cursor" sprite; fine pointers only) ── */
+@media (pointer: fine) {
+  html, body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='18' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='2' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='4' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='4' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='6' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='6' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='4' y='6' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='6' y='6' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='8' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='8' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='4' y='8' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='6' y='8' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='8' y='8' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='10' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='10' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='4' y='10' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='6' y='10' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='12' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='12' width='2' height='2' fill='%23efe6cf'/%3E%3Crect x='4' y='12' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='14' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='14' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='16' width='2' height='2' fill='%230a0e1a'/%3E%3C/svg%3E") 0 0, default; }
+  html :is(a, button, [role='switch'], .tnode-cert) { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='18' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='2' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='4' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='4' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='6' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='6' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='4' y='6' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='6' y='6' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='8' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='8' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='4' y='8' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='6' y='8' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='8' y='8' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='10' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='10' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='4' y='10' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='6' y='10' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='12' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='12' width='2' height='2' fill='%23e8b84a'/%3E%3Crect x='4' y='12' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='14' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='2' y='14' width='2' height='2' fill='%230a0e1a'/%3E%3Crect x='0' y='16' width='2' height='2' fill='%230a0e1a'/%3E%3C/svg%3E") 0 0, pointer; }
+}
+
+/* ── Living background ─────────────────────────────────────── */
+
+.cloud-mover {
+  animation: cloud-drift 80s linear infinite;
+}
+
+@keyframes cloud-drift {
+  from { transform: translateX(calc(var(--cx, 0px) * -1 - 24px)); }
+  to { transform: translateX(calc(192px - var(--cx, 0px) + 24px)); }
+}
+
+.shooting-star-mover {
+  opacity: 0;
+  animation: shoot 17s steps(10, end) 3s infinite;
+}
+
+@keyframes shoot {
+  0%, 94% { opacity: 0; transform: translate(0, 0); }
+  95% { opacity: 1; transform: translate(0, 0); }
+  100% { opacity: 0; transform: translate(34px, 16px); }
+}
+
+.cat-shut { opacity: 0; }
+.cat-open { animation: cat-open 6s steps(1, end) infinite; }
+.cat-shut { animation: cat-shut 6s steps(1, end) infinite; }
+
+@keyframes cat-open { 0%, 90% { opacity: 1; } 91%, 96% { opacity: 0; } 97%, 100% { opacity: 1; } }
+@keyframes cat-shut { 0%, 90% { opacity: 0; } 91%, 96% { opacity: 1; } 97%, 100% { opacity: 0; } }
+
+/* PRESS START: the hero walks up to the terminal. */
+.is-launching .scene-hero {
+  animation: hero-walk 520ms steps(8, end) both;
+}
+
+.is-launching .hero-frame-a { animation-duration: 0.2s; }
+.is-launching .hero-frame-b { animation-duration: 0.2s; }
+
+@keyframes hero-walk {
+  to { transform: translateX(8px); }
+}
+
+/* ── Title screen: greeting + readable plates over bright skies ── */
+
+.title-greeting {
+  margin-top: 14px;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5625rem, 1.8vw, 0.6875rem);
+  letter-spacing: 0.12em;
+  color: var(--teal);
+  animation: title-fade 300ms steps(3, end) 1.8s backwards;
+}
+
+.title-tag,
+.title-hint,
+.title-greeting {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  padding: 3px 10px;
+  background: rgba(7, 11, 22, 0.62);
+}
+
+.title-tag { margin-top: 8px; color: var(--cream); }
+.title-greeting { margin-top: 14px; }
+.title-hint { margin-top: 8px; color: var(--pale); }
+
+/* Tighter vertical rhythm so the stacked lines stay clear of the hero and terminal. */
+.title { padding-top: clamp(40px, 6dvh, 110px); }
+.title-sub { margin-top: clamp(12px, 2.2dvh, 36px); }
+.press-start { margin-top: clamp(12px, 2.4dvh, 32px); }
+
+@media (max-height: 680px) {
+  .title-greeting,
+  .title-hint { display: none; }
+}
+
+/* ── Blinking portrait ─────────────────────────────────────── */
+
+.portrait-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.portrait-wrap .sprite {
+  position: absolute;
+  inset: 0;
+}
+
+.portrait-blink {
+  opacity: 0;
+  animation: portrait-blink 5.5s steps(1, end) infinite;
+}
+
+@keyframes portrait-blink {
+  0%, 94% { opacity: 0; }
+  95%, 98% { opacity: 1; }
+  99%, 100% { opacity: 0; }
+}
+
+/* ── Skill tree power-on intro ─────────────────────────────── */
+/* Opacity and brightness only: nodes are positioned with transforms we must not override. */
+
+.tree-intro .tnode,
+.tree-intro .lnode,
+.tree-intro .tjoint {
+  animation: node-on 360ms steps(4, end) calc(var(--depth, 0) * 170ms) backwards;
+}
+
+.tree-intro .edge,
+.tree-intro .rail-casing {
+  animation: edge-on 360ms steps(4, end) calc(var(--depth, 0) * 170ms - 120ms) backwards;
+}
+
+.tree-intro .tree-cursor { visibility: hidden; }
+
+@keyframes node-on {
+  0% { opacity: 0; filter: brightness(2.2); }
+  60% { opacity: 1; filter: brightness(1.8); }
+  100% { opacity: 1; filter: none; }
+}
+
+@keyframes edge-on {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Keep the animated background on its own compositor layer so drifting clouds
+   can never repaint on top of the foreground text. */
+.scene {
+  will-change: transform;
+}
+
+/* ── Title-screen hot-spots: cat, hero, terminal ─────────────── */
+
+.scene-hits {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.scene-hit {
+  position: absolute;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep the hot-spots out of the way while the logo plays or the hero walks away. */
+.is-launching .scene-hits { visibility: hidden; }
+
+.scene-hit::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: calc(8px * var(--type-scale));
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--line);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scene-hit:hover::after,
+.scene-hit:focus-visible::after { opacity: 1; }
+
+.scene-hit:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.scene-bubble {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  max-width: min(260px, 80vw);
+  padding: 8px 12px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: calc(9px * var(--type-scale));
+  line-height: 1.6;
+  text-align: center;
+  box-shadow: 0 0 0 3px var(--ink);
+  pointer-events: none;
+  animation: bubble-pop 160ms steps(3, end) backwards;
+}
+
+.scene-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: var(--ink);
+}
+
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translate(-50%, -80%); }
+  to { opacity: 1; transform: translate(-50%, -100%); }
+}
+
+/* The title text always wins over a hot-spot that overlaps it (e.g. the terminal's antenna). */
+.title-inner { position: relative; z-index: 2; pointer-events: none; }
+.title-inner > * { pointer-events: auto; }
+.scene-hits { z-index: 1; }

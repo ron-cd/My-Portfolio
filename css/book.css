@@ -1,0 +1,357 @@
+/* =============================================================================
+   book.css — The QUEST LOG as an open book.
+   Left page: quest list. Right page: the selected quest. Bookmark tabs filter by
+   status. Parchment colours are local to this file; they are the only place the
+   site leaves the midnight palette.
+   ============================================================================= */
+
+.book {
+  --page: #ecdab4;
+  --page-2: #e0c796;
+  --page-edge: #c9a874;
+  --page-row: #dcc08e;
+  --page-row-hi: #d1ac70;
+  --page-ink: #4a3320;
+  --page-ink-2: #5a3f27;
+  --page-accent: #7a4a12;
+  --book-frame: #2c3347;
+  --book-frame-hi: #5b6785;
+  --tab-all: #c0473f;
+  --tab-completed: #4f9a58;
+  --tab-in-progress: #4f86c6;
+  --tab-experimental: #a04a9c;
+
+  position: relative;
+  margin-top: 12px;
+  padding: calc(var(--px) * 4);
+  background: var(--book-frame);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--ink),
+    0 var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 0 var(--ink),
+    var(--px) 0 0 0 var(--ink),
+    inset 0 0 0 var(--px) var(--book-frame-hi);
+  margin-inline: var(--px);
+}
+
+/* Stone corner brackets */
+.book-corner {
+  position: absolute;
+  z-index: 3;
+  width: calc(var(--px) * 9);
+  height: calc(var(--px) * 9);
+  background: #6c7893;
+  box-shadow: inset 0 0 0 var(--px) var(--ink), inset calc(var(--px) * 2) calc(var(--px) * 2) 0 0 #8f9ab4;
+}
+
+.book-corner::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--px) * 3);
+  background: var(--book-frame);
+  box-shadow: inset 0 0 0 var(--px) var(--ink);
+}
+
+.book-corner-tl { top: calc(var(--px) * -2); left: calc(var(--px) * -2); }
+.book-corner-tr { top: calc(var(--px) * -2); right: calc(var(--px) * -2); }
+.book-corner-bl { bottom: calc(var(--px) * -2); left: calc(var(--px) * -2); }
+.book-corner-br { bottom: calc(var(--px) * -2); right: calc(var(--px) * -2); }
+
+/* ── The two pages ─────────────────────────────────────────── */
+
+.book-spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  height: clamp(560px, calc(100dvh - 230px), 720px);
+  background: var(--page);
+  box-shadow: 0 0 0 var(--px) #7b4a2e, 0 0 0 calc(var(--px) * 2) var(--ink);
+  color: var(--page-ink);
+  /* Pixel-stepped shadow down the middle (the spine) */
+  background-image: linear-gradient(90deg,
+    transparent calc(48% - 24px), rgba(110, 70, 30, 0.08) calc(48% - 24px), rgba(110, 70, 30, 0.08) calc(48% - 16px),
+    rgba(110, 70, 30, 0.16) calc(48% - 16px), rgba(110, 70, 30, 0.16) calc(48% - 8px),
+    rgba(110, 70, 30, 0.28) calc(48% - 8px), rgba(110, 70, 30, 0.28) 48%,
+    transparent 48%);
+}
+
+.book-spread::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(48% - 2px);
+  width: calc(var(--px) * 1.5);
+  background: #8a5a36;
+  pointer-events: none;
+}
+
+.page {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 20px 22px 24px;
+  overflow-y: auto;
+  scrollbar-color: #a87d4a #e0c796;
+  scrollbar-width: auto;
+}
+
+.page::-webkit-scrollbar { width: 12px; }
+.page::-webkit-scrollbar-track { background: var(--page-2); box-shadow: inset 0 0 0 2px var(--page-edge); }
+.page::-webkit-scrollbar-thumb { background: #a87d4a; box-shadow: inset 0 0 0 2px #7b4a2e; }
+
+.page-left { padding-right: 30px; }
+.page-right { padding-left: 30px; }
+
+/* Text defaults on parchment */
+.page p, .page li, .page dd { color: var(--page-ink); }
+.page .muted { color: var(--page-ink-2); }
+.page .sub-label { color: var(--page-accent); }
+
+/* ── Ribbon title ──────────────────────────────────────────── */
+
+.book-ribbon {
+  position: relative;
+  margin: 4px 14px 18px;
+  padding: 12px 18px;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.9rem, 1.8vw, 1.25rem);
+  letter-spacing: 0.12em;
+  color: #7a4f2d;
+  background: var(--page-row);
+  clip-path: polygon(0 12%, 4% 12%, 4% 0, 96% 0, 96% 12%, 100% 12%, 100% 88%, 96% 88%, 96% 100%, 4% 100%, 4% 88%, 0 88%);
+  text-shadow: 2px 2px 0 rgba(255, 245, 220, 0.6);
+}
+
+/* ── Quest rows ────────────────────────────────────────────── */
+
+.quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.quest-empty {
+  padding: 16px;
+  color: var(--page-ink-2);
+  font-style: italic;
+}
+
+.quest-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 12px 8px 14px;
+  text-align: left;
+  color: var(--page-ink);
+  background: var(--page-row);
+  border: 0;
+  box-shadow: inset 0 0 0 2px var(--page-edge);
+  cursor: pointer;
+}
+
+.quest-item:hover { background: #d6b985; }
+
+.quest-item.is-selected {
+  background: var(--page-row-hi);
+  box-shadow: inset 0 0 0 2px #8a5a36;
+}
+
+/* Red selection arrow, drawn with borders */
+.quest-item.is-selected::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  margin-top: -7px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 9px solid #c0473f;
+}
+
+.quest-item:focus-visible { outline: 3px solid var(--page-accent); outline-offset: 2px; }
+
+.quest-icon {
+  display: grid;
+  place-items: center;
+  width: calc(var(--px) * 11);
+  height: calc(var(--px) * 11);
+  background: var(--page);
+  box-shadow: inset 0 0 0 2px #8a5a36;
+}
+
+.quest-icon .sprite { width: calc(var(--px) * 7); height: calc(var(--px) * 7); }
+.quest-icon-lg { width: calc(var(--px) * 14); height: calc(var(--px) * 14); flex: none; }
+.quest-icon-lg .sprite { width: calc(var(--px) * 9); height: calc(var(--px) * 9); }
+
+.quest-text { display: grid; min-width: 0; }
+.quest-text strong { font-weight: 600; font-size: 1rem; color: var(--page-ink); overflow-wrap: anywhere; }
+.quest-text small { color: var(--page-ink-2); font-size: 0.8125rem; line-height: 1.35; }
+
+.quest-state {
+  display: grid;
+  place-items: center;
+  width: calc(var(--px) * 8);
+  height: calc(var(--px) * 8);
+  background: var(--page);
+  box-shadow: inset 0 0 0 2px var(--page-edge);
+}
+
+.quest-state .sprite { width: calc(var(--px) * 5); height: calc(var(--px) * 5); }
+
+/* ── Bookmark tabs ─────────────────────────────────────────── */
+
+.book-tabs {
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  right: calc(var(--px) * -9);
+  display: grid;
+  gap: 10px;
+}
+
+.book-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  writing-mode: vertical-rl;
+  padding: 12px 6px 18px;
+  min-height: 48px;
+  color: #fff;
+  font-family: var(--font-pixel);
+  font-size: calc(9px * var(--type-scale));
+  letter-spacing: 0.1em;
+  text-shadow: 1px 1px 0 rgba(10, 14, 26, 0.7);
+  background: var(--tab-all);
+  border: 0;
+  cursor: pointer;
+  /* Notched ribbon end */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 50% 100%, 0 calc(100% - 8px));
+  box-shadow: inset 0 0 0 2px rgba(10, 14, 26, 0.5);
+  transform: translateX(-6px);
+  transition: transform 120ms steps(3, end);
+}
+
+.book-tab[data-filter='completed'] { background: var(--tab-completed); }
+.book-tab[data-filter='in-progress'] { background: var(--tab-in-progress); }
+.book-tab[data-filter='experimental'] { background: var(--tab-experimental); }
+
+.book-tab:hover { transform: translateX(0); }
+.book-tab[aria-pressed='true'] { transform: translateX(4px); box-shadow: inset 0 0 0 3px #fff3d6; }
+.book-tab:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.book-tab-count { opacity: 0.85; }
+
+/* ── Right page ────────────────────────────────────────────── */
+
+.quest-detail:focus-visible { outline: 3px solid var(--page-accent); outline-offset: -6px; }
+
+.quest-body { display: grid; gap: 14px; }
+
+.book-art {
+  display: block;
+  padding: 6px;
+  background: var(--page-2);
+  box-shadow: inset 0 0 0 3px #8a5a36, inset 0 0 0 5px var(--page);
+}
+
+.book-art-svg { display: block; width: 100%; height: auto; }
+
+.book-shots { display: flex; gap: 8px; overflow-x: auto; }
+.shot { max-height: 220px; width: auto; }
+
+.quest-head { display: flex; gap: 14px; align-items: center; }
+
+.quest-name {
+  margin: 0 0 4px;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.8125rem, 1.8vw, 1.0625rem);
+  line-height: 1.5;
+  color: #6a3f14;
+}
+
+.quest-note {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--page-2);
+  border-left: var(--px) solid #c0702a;
+  font-size: 0.9375rem;
+}
+
+.quest-section { display: grid; gap: 6px; }
+.quest-section p { margin: 0; }
+.quest-section .sub-label { margin: 6px 0 0; }
+
+.quest-links { display: flex; flex-wrap: wrap; gap: 4px; margin: calc(var(--px) * -1); }
+.quest-back { display: none; }
+
+/* Components restyled for parchment */
+.book .tag { background: var(--page-row); color: var(--page-ink); box-shadow: inset 0 0 0 2px #8a5a36; }
+.book .badge { box-shadow: inset 0 0 0 2px var(--page-ink); }
+.book .badge-completed { background: #8cc78f; color: #17361b; }
+.book .badge-in-progress { background: #f1cd78; color: #4a3207; }
+.book .badge-experimental { background: #d9aee0; color: #3a1740; }
+.book .bullet-list li::before { color: var(--page-accent); }
+.book .link-list a { color: #1f4f8f; }
+.book .item-empty-title { color: var(--page-accent); }
+
+/* Page turn: the right page wipes in from the spine */
+.quest-detail.just-opened .quest-body { animation: page-turn 260ms steps(5, end) backwards; }
+
+@keyframes page-turn {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* ── Tablet / phone: one page at a time, tabs along the top ── */
+
+@media (max-width: 859px) {
+  .book { padding: calc(var(--px) * 3); }
+  .book-corner { display: none; }
+
+  .book-tabs {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 calc(var(--px) * 3);
+  }
+
+  .book-tab {
+    writing-mode: horizontal-tb;
+    padding: 10px 12px;
+    min-height: 44px;
+    clip-path: none;
+    transform: none;
+  }
+
+  .book-tab[aria-pressed='true'] { transform: none; }
+
+  .book-spread {
+    display: block;
+    height: auto;
+    background-image: none;
+  }
+
+  .book-spread::after { display: none; }
+  .page { overflow: visible; padding: 16px 14px 22px; }
+  .page-left, .page-right { padding-inline: 14px; }
+  .book-ribbon { margin-inline: 4px; }
+  .quest-item.is-selected::before { display: none; }
+
+  .quest-layout[data-view='list'] .quest-detail { display: none; }
+  .quest-layout[data-view='detail'] .quest-list-window { display: none; }
+
+  .quest-back { display: inline-flex; margin-bottom: 4px; justify-self: start; }
+}
+
+@media (min-width: 860px) {
+  .book { margin-right: calc(var(--px) * 10); }
+}

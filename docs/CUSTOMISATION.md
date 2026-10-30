@@ -1,161 +1,64 @@
-# Customisation Guide
+# Customisation
 
-Use this guide when changing personal content or visual direction.
+All content is in `js/data/`. Run `npm test` after changes.
 
----
+## Update my profile
 
-## Personal Content
+Edit `js/data/profile.js` (name, intro, education, abilities, strengths, goals). Abilities are plain tags on purpose: no made-up skill percentages.
 
-Most copy and links live in `index.html`. Search and replace:
+The EQUIPMENT screen reads `gear` in the same file: six slots, each holding items that must also appear in `abilities` (`npm test` checks this). "Used in N projects" is calculated from each project's `tech` list; add a `match` array to an item when the project spells it differently (for example Docker matches `Docker Compose`). The stats strip (projects, certifications, achievements, start year) is calculated too, so nothing there is typed by hand.
 
-| Placeholder | Replace with |
-|---|---|
-| `Aaron Dela Cruz` | Your full name |
-| `aaron@example.com` | Your email address |
-| `github.com/aaron-delacruz` | Your GitHub URL |
-| `linkedin.com/in/aaron-delacruz` | Your LinkedIn URL |
-| `twitter.com/aarondev` | Your Twitter/X handle |
-| `Mabalacat City` | Your city |
-| `assets/Aaron_Dela_Cruz_CV.pdf` | Path to your CV file |
-| `AKDC` | Your initials (footer wordmark) |
+## Add or change a certification
 
-Also update SEO meta tags near the top of `index.html`:
+In `js/data/certifications.js`, copy the template at the bottom of `nodes`:
 
-```html
-<link rel="canonical" href="https://your-domain.com/" />
-<meta property="og:url"   content="https://your-domain.com/" />
-<meta property="og:image" content="assets/img/og-image.png" />
-```
+1. Give it a unique `id`, a `title`, `issuer`, `description`, `skills`, and (if available) `date`, `credentialId`, `url`.
+2. Set `status` to `'earned'`, `'in-progress'`, or `'planned'`. Only use `'earned'` for credentials you hold. Planned and in-progress nodes are styled differently and labelled.
+3. Pick `x`/`y` on the 1000 × 650 canvas. The four branches use rows at y = 155 (top) and y = 495 (bottom); slots are 130 apart (x = 800, 930 on the right; 200, 70 on the left). A row holds two certifications; for more, widen `TREE_SIZE.width` and shift the nodes. `npm test` fails if a node leaves the canvas.
+4. Add its `id` to the previous node's `connections` so a line is drawn.
 
----
+Connections show topic grouping, not official prerequisites. To add a new branch, add a `kind: 'branch'` node, connect it from `player`, and list it in `branches` (this drives the mobile list).
 
-## Theme Tokens
+## Add a quest (project)
 
-All design values are in `css/base.css` under `:root`. Change these first before touching component CSS.
+Add an object to `js/data/projects.js`. Required: `id`, `name`, `category` (`completed` | `in-progress` | `experimental`), `summary`. Fields you leave out are simply hidden. Links that are `null` show a fallback instead of a button.
 
-```css
-/* Brand colours — edit these */
---clr-accent:   #64b5f6;   /* primary highlight: links, bars, borders */
---clr-accent-2: #7d719d;   /* secondary accent: gradients, alt buttons */
---clr-accent-3: #00d4aa;   /* tertiary accent: cert links and supporting glows */
---clr-bg:       #060912;   /* main background */
---clr-bg-deep:  #02050b;   /* deepest background (body) */
+Screenshots: put images in `assets/img/` and list them as `screenshots: [{ src: 'assets/img/x.png', alt: 'What it shows' }]`. Pixel-art images should be given `image-rendering: pixelated` in CSS.
 
-/* Typography — edit these */
---font-display: 'Syne', sans-serif;         /* headings, nav, buttons */
---font-body:    'DM Sans', sans-serif;      /* body copy */
---font-mono:    'JetBrains Mono', monospace; /* code, labels, kickers */
+The quest log is drawn as a book. If a quest has no screenshots, its right page shows a pixel illustration generated from the quest's `icon` (see `js/ui/bookart.js`); a screenshot that fails to load falls back to the same illustration. Page colours are the `--page*` variables at the top of `css/book.css`.
 
-/* Layout */
---container-max: 1180px;   /* max content width */
---nav-height:    72px;     /* header height (also used for section offset) */
-```
+## Sky, greeting, and cat
 
----
+`SKIES` in `js/core/scene.js` defines the four skies; the greeting lines are `GREETING` in `js/core/settings.js`. The hour windows are in `currentSky()` there. Remove the cat by deleting the "Companion cat" block in `scene.js`.
 
-## Responsive Breakpoints
+## Achievements
 
-Breakpoints are defined in `css/sections.css` (in the responsive hardening sections at the bottom):
+Add manual entries in `js/data/achievements.js` (`group`, `icon`, `name`, `description`, optional `date`, `short` caption and `count` for "×2"). Earned certifications and completed quests appear automatically as badges and link back to their details; quests that are still in progress show as locked badges.
 
-| Breakpoint | Target |
-|---|---|
-| `1440px+` | Wide desktop — larger wordmark, wider containers |
-| `1200px` | Laptop / tablet landscape — reduce decoration density |
-| `900px` | Tablet portrait — stack grids, hide hero badges |
-| `768px` | Small tablet — mobile nav, footer stacking |
-| `760px` | Mobile hero — hero-content goes full-width |
-| `640px` | Mobile — mobile nav padding, smaller section spacing |
-| `420px` | Small mobile — font clamps, single-column everything |
-| `380px` | Very small — CTAs stack vertically |
-| `max-height: 500px` | Landscape phones — reduce hero height |
+## The village (Walk Around)
 
----
+`js/data/world.js` describes a 32 × 20 tile map. Each building has a footprint (`x`, `y`, `w`, `h`), a `door` tile directly below it, the screen it opens (`route`) and its colours and emblem. Roads are rectangles (`x1, y1` to `x2, y2`); a path from each door down to the nearest road is added automatically. Trees, lamps, the lake and flowers are plain tile lists. Run `npm test`: it checks that every door is below its building and can be reached from the start tile. To change how big things look on screen, change `TILES_ACROSS` in `js/scenes/world.js`.
 
-## Satellite Path
+## The plain summary page
 
-Edit `js/satellite.js`. Three waypoint profiles control the satellite's position as the user scrolls:
+`#/summary` is generated from the same data files. To change what it lists, edit `js/scenes/summary.js`; its print layout is at the bottom of `css/summary.css`.
 
-```js
-WAYPOINTS.desktop  // above 1100px
-WAYPOINTS.tablet   // 641px to 1100px
-WAYPOINTS.mobile   // 640px and below, kept as a fallback profile
-```
+## Search and social data
 
-**Rule:** All profiles must have the same number of waypoints with the same `p` values.
-The satellite is hidden on compact, save-data, reduced-motion, and constrained devices for performance.
+After editing content, run `npm run seo`. It rewrites the JSON-LD block and the no-JavaScript fallback in `index.html` (between the `seo:` comment markers). Never edit those regions by hand.
 
-```js
-// Waypoint shape
-{ p: 0.20, x: 0.22, y: 0.18, rotZ: -8, scale: 0.78 }
-// p     = page scroll progress [0..1]
-// x, y  = viewport fractions (0 = left/top, 1 = right/bottom)
-// rotZ  = canvas tilt in degrees
-// scale = visual size multiplier
-```
+## Contact and CV
 
-**Do not** add GSAP tweens that animate `x`, `y`, `scale`, or `rotation` on `#sat-canvas`. ScrollTrigger owns those properties.
+Edit `js/data/site.js`. The CV path points at `assets/Aaron_Dela_Cruz_CV.pdf`; replace that file to update it. The letter opens the visitor's email app with a pre-filled draft (it never claims to have sent anything). The quest-type chips come from `contact.topics` in the same file; each `subject` starts the email subject line. To use a real form backend, replace the submit handler in `js/scenes/contact.js`.
 
----
+## Colours, fonts, pixel size
 
-## Skills Belt
+`css/tokens.css` holds every colour, the two fonts, and `--px` (the base pixel unit that borders and shadows are built from). When you add CSS, write pixel-font sizes as `calc(10px * var(--type-scale))` so the LARGER TEXT and READABLE FONT options keep working. Sprite colours are in `PALETTE` in `js/core/sprites.js`; the background scene colours are at the top of `js/core/scene.js`.
 
-Skills are listed as `.skill-belt-item` elements inside `#skills-belt-track` in `index.html`.
+## The no-JavaScript fallback
 
-```html
-<span class="skill-belt-item">JavaScript ES6+</span>
-```
+Generated: see "Search and social data" above. `npm test` fails if `index.html` is out of date with `js/data`.
 
-Add, remove, or reorder those items directly. `js/main.js` clones the list once at runtime so the marquee loops cleanly.
+## Music
 
----
-
-## Projects
-
-Each project is an `<article class="project-holo-panel">` inside `#projects-dock`. To add a project:
-
-1. Copy an existing `<article>` block.
-2. Update these `data-*` attributes on the article:
-   - `data-holo-color` — hex colour for the hologram sphere
-   - `data-holo-accent` — secondary hex colour
-   - `data-holo-label-a/b/c` — three hologram display labels
-3. Update the kicker text (`01 / 04`), title, description, metadata, tags, and buttons.
-4. Add a matching dot button in `.project-holo-progress`:
-   ```html
-   <button type="button" data-holo-jump="3" aria-label="Show Your Project Name"></button>
-   ```
-5. Update all `aria-label` values on the dot buttons.
-
----
-
-## Certifications
-
-Each cert is a `<div class="cert-stack-card">` inside `.cert-stack-inner`. Copy an existing card and update:
-
-- `cert-media img` — SVG or image source
-- `cert-name` — certification title
-- `cert-issuer` — issuing organisation
-- `cert-date` — completion date
-- `cert-desc` — short description
-- `cert-topics` — topic chips
-- `cert-link` — URL to the credential
-
----
-
-## Contact Form
-
-The form currently shows local success feedback only. To connect a real service, edit `js/main.js` in the `initContactForm()` function's submit handler.
-
-Options:
-- **Formspree:** Add `action="https://formspree.io/f/your-id"` and `method="POST"` to the form, remove `novalidate`, and let Formspree handle submission.
-- **EmailJS:** Call `emailjs.sendForm()` inside the submit handler.
-- **Netlify Forms:** Add `netlify` attribute to the form element.
-
-See `docs/DEPLOYMENT.md` for full integration notes.
-
----
-
-## Footer
-
-The large `AKDC` wordmark is intentionally centered to the full viewport width, not the container, so it stays visually centered on ultra-wide displays. Change the text in `index.html` in the `.footer-wordmark` anchor.
-
-Footer star animation speed is controlled by `animation-duration` on `.footer-starfield::before/::after` in `css/sections.css`.
+The four tunes are data at the top of `js/core/music.js` (`THEMES`: `village`, `morning`, `afternoon`, `night`; each has tempo, key, chords, a melody and `bass` written as chord degrees, and a `level` that balances loudness). `village` plays on the map; the others follow the time of day (change which plays when in `chooseTheme()`). Edit them or add notes; keep the master gain low.

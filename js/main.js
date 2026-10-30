@@ -1,388 +1,254 @@
 /**
- * main.js — Entry point: wires all modules and boots the portfolio
- * ─────────────────────────────────────────────────────────────────
- * Author  : Aaron Dela Cruz
- * Updated : 2026
+ * main.js — Application shell for PLAYER ONE.
  *
- * Load order (all deferred via type="module"):
- *   utils.js → scroll.js → animation.js → main.js
+ * One persistent shell (background scene, HUD, main region, transition layer)
+ * hosts whichever "scene" is active. Scenes are plain modules exporting:
  *
- * SECTIONS
- * ────────────────────────────────────────────────────────────────
- * 1. initNavbar()       — scroll-glass nav, hamburger, active link
- * 2. initScrollProgress()— top-of-page progress bar
- * 3. initSkillsBelt()   — clones skill items for seamless CSS loop
- * 4. initContactForm()  — client-side validation + static form POST
- * 5. initTyping()       — typewriter role-text cycle in the hero
- * 6. initCursorGlow()   — desktop-only mouse-following glow
- * 7. initHeroMotion()   — GSAP parallax on hero ambient layers
- * 8. DOMContentLoaded   — boot sequence
+ *   label                      – text shown in the HUD
+ *   mount(ctx) → { el, focus(), unmount(), onKey(event) → boolean }
+ *
+ * The shell owns routing, the pixel-wipe transition, focus management,
+ * global keyboard handling (Escape = back), and the sound toggle.
  */
 
-'use strict';
+import { h, prefersReducedMotion, wait, isTypingTarget } from './core/dom.js';
+import { createRouter } from './core/router.js';
+import { buildScene } from './core/scene.js';
+import { sound } from './core/audio.js';
+import { music } from './core/music.js';
+import { prefs, progress, currentSky } from './core/settings.js';
+import { sprite } from './core/sprites.js';
+import { createOptions } from './ui/options.js';
 
-import { isLowPowerMode, lerp, prefersReducedMotion } from './utils.js';
-import { scrollTracker }                         from './scroll.js';
-import { initScrollReveal } from './animation.js';
+import * as title from './scenes/title.js';
 
-/* ============================================================
-   NAVBAR
-   Active link highlighting + mobile toggle + scroll-glass
-   ============================================================ */
-function initNavbar() {
-  const nav    = document.getElementById('main-nav');
-  const toggle = document.getElementById('nav-toggle');
-  const links  = document.getElementById('nav-links');
-  if (!nav || !links) return;
-
-  const navAs = links.querySelectorAll('a');
-
-  // Glass background once user scrolls past 60 px
-  scrollTracker.on(({ scrollY }) => {
-    nav.classList.toggle('nav--scrolled', scrollY > 60);
-  });
-
-  const setMenuOpen = isOpen => {
-    links.classList.toggle('nav-links--open', isOpen);
-    nav.classList.toggle('nav--menu-open', isOpen);
-    document.body.classList.toggle('nav-menu-open', isOpen);
-    toggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    const icon = toggle?.querySelector('i');
-    if (icon) {
-      icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
-    }
-  };
-
-  // Mobile hamburger toggle
-  toggle?.addEventListener('click', () => {
-    setMenuOpen(!links.classList.contains('nav-links--open'));
-  });
-
-  // Close menu on any link click (mobile)
-  navAs.forEach(a => {
-    a.addEventListener('click', () => {
-      setMenuOpen(false);
-    });
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && links.classList.contains('nav-links--open')) {
-      setMenuOpen(false);
-      toggle?.focus();
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && links.classList.contains('nav-links--open')) {
-      setMenuOpen(false);
-    }
-  }, { passive: true });
-
-  // Highlight active section link
-  document.addEventListener('sectionChange', e => {
-    const { section } = e.detail;
-    navAs.forEach(a => {
-      a.classList.toggle('active', !!section && a.getAttribute('href') === `#${section}`);
-    });
-  });
+/**
+ * Only the title screen is in the first download. Every other screen is a separate
+ * module that is fetched the first time it is visited (and the village is fetched
+ * while the title is idle, because PRESS START opens it).
+ */
+const LOADERS = {
+  profile: () => import('./scenes/profile.js'),
+  skills: () => import('./scenes/skilltree.js'),
+  quests: () => import('./scenes/quests.js'),
+  achievements: () => import('./scenes/achievements.js'),
+  contact: () => import('./scenes/contact.js'),
+  summary: () => import('./scenes/summary.js'),
+  world: () => import('./scenes/world.js'),
+};
+const loadedScenes = { title };
+async function loadScene(route) {
+  loadedScenes[route] ||= await LOADERS[route]();
+  return loadedScenes[route];
 }
 
-/* ============================================================
-   SCROLL PROGRESS
-   Lightweight transform-only progress indicator
-   ============================================================ */
-function initScrollProgress() {
-  const bar = document.getElementById('scroll-progress');
-  if (!bar) return;
+/** Where Escape / the HUD back button goes from each scene. The village is the hub. */
+const PARENT = {
+  profile: 'world',
+  skills: 'world',
+  quests: 'world',
+  achievements: 'world',
+  contact: 'world',
+  summary: 'title',
+  world: 'title',
+};
 
-  scrollTracker.on(({ progress }) => {
-    bar.style.transform = `scaleX(${progress})`;
-  });
+/** Escape never takes you out of the village (it only closes the LOCATIONS drawer there). */
+const ESCAPE_STAYS = new Set(['world']);
+const parentOf = name => PARENT[name];
+const PARENT_LABEL = { title: 'TITLE', world: 'VILLAGE' };
+
+const WIPE_COLUMNS = 16;
+const WIPE_MS = 200;
+
+const app = document.getElementById('app');
+const stage = document.getElementById('stage');
+const screen = document.getElementById('screen');
+const wipe = document.getElementById('wipe');
+const announcer = document.getElementById('announcer');
+const hudBack = document.getElementById('hud-back');
+const hudTitle = document.getElementById('hud-title');
+const soundToggle = document.getElementById('sound-toggle');
+
+let active = null;        // { name, instance }
+let busy = false;
+let pending = null;       // latest route requested during a transition
+let firstRender = true;
+
+/* ── Background scene (follows the sky setting) ─────────────── */
+function renderStage() {
+  try {
+    const next = buildScene({ sky: currentSky() });
+    const current = stage.querySelector('.scene');
+    if (current) current.replaceWith(next); else stage.prepend(next);
+  } catch (error) {
+    // The site stays fully usable on the CSS fallback gradient.
+    console.warn('Scene failed to render:', error);
+  }
+}
+renderStage();
+
+/* ── Options window, scanlines ──────────────────────────────── */
+const optionsBtn = document.getElementById('options-btn');
+optionsBtn.append(sprite('gear'));
+const options = createOptions({ mount: app, sound, music, prefs, progress });
+optionsBtn.addEventListener('click', () => { sound.select(); options.open(optionsBtn); });
+
+let lastNight = prefs.nightLock;
+prefs.onChange(() => {
+  document.documentElement.classList.toggle('crt-on', prefs.scanlines);
+  if (prefs.nightLock !== lastNight) { lastNight = prefs.nightLock; renderStage(); }
+});
+document.documentElement.classList.toggle('crt-on', prefs.scanlines);
+
+/* ── Transition layer ───────────────────────────────────────── */
+for (let i = 0; i < WIPE_COLUMNS; i += 1) {
+  wipe.append(h('i', { style: `--i:${i}` }));
 }
 
-/* ============================================================
-   SKILLS BELT
-   Duplicates the editable skill panels once for a seamless CSS loop.
-   ============================================================ */
-function initSkillsBelt() {
-  const track = document.getElementById('skills-belt-track');
-  if (!track || prefersReducedMotion()) return;
-  if (track.dataset.cloned === 'true') return;
-
-  const originals = [...track.querySelectorAll(':scope > .skill-belt-item')];
-  if (originals.length < 4) return;
-
-  originals.forEach(item => {
-    const clone = item.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    track.appendChild(clone);
-  });
-
-  track.dataset.cloned = 'true';
-  track.classList.add('is-looping');
+async function coverScreen() {
+  wipe.classList.add('is-active', 'is-covering');
+  wipe.classList.remove('is-revealing');
+  await wait(WIPE_MS + WIPE_COLUMNS * 12);
 }
 
-/* ============================================================
-   CONTACT FORM
-   Client-side validation + Netlify Forms POST
-   ============================================================ */
-function initContactForm() {
-  const form = document.getElementById('contact-form');
-  const btn  = document.getElementById('submit-btn');
-  if (!form || !btn) return;
-  const status = document.getElementById('form-status');
-
-  const fields = {
-    name: form.elements.name,
-    email: form.elements.email,
-    message: form.elements.message,
-  };
-
-  const errors = {
-    name: document.getElementById('name-error'),
-    email: document.getElementById('email-error'),
-    message: document.getElementById('message-error'),
-  };
-
-  function setError(field, message) {
-    const input = fields[field];
-    if (!input) return;
-    input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    if (errors[field]) errors[field].textContent = message;
-  }
-
-  function setStatus(message, state = '') {
-    if (!status) return;
-    status.textContent = message;
-    status.dataset.state = state;
-  }
-
-  function validate() {
-    let valid = true;
-    const emailValue = fields.email?.value.trim() || '';
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
-
-    if (!fields.name?.value.trim()) {
-      setError('name', 'Enter your name.');
-      valid = false;
-    } else {
-      setError('name', '');
-    }
-
-    if (!emailValue) {
-      setError('email', 'Enter an email address.');
-      valid = false;
-    } else if (!emailOk) {
-      setError('email', 'Enter a valid email address.');
-      valid = false;
-    } else {
-      setError('email', '');
-    }
-
-    if (!fields.message?.value.trim()) {
-      setError('message', 'Write a short message.');
-      valid = false;
-    } else {
-      setError('message', '');
-    }
-
-    return valid;
-  }
-
-  function setSubmitButton(iconClass, label) {
-    const icon = document.createElement('i');
-    icon.className = iconClass;
-    icon.setAttribute('aria-hidden', 'true');
-    btn.replaceChildren(icon, document.createTextNode(label));
-  }
-
-  function resetSubmitButton() {
-    setSubmitButton('fas fa-paper-plane', 'Send Message');
-  }
-
-  Object.values(fields).forEach(input => {
-    input?.addEventListener('input', () => {
-      if (input.getAttribute('aria-invalid') === 'true') validate();
-    });
-  });
-
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    setStatus('');
-    if (!validate()) {
-      const firstInvalid = form.querySelector('[aria-invalid="true"]');
-      firstInvalid?.focus();
-      return;
-    }
-
-    setSubmitButton('fas fa-circle-notch fa-spin', 'Sending...');
-    btn.disabled = true;
-
-    try {
-      const data = new FormData(form);
-      const response = await fetch(form.getAttribute('action') || '/', {
-        method: form.getAttribute('method') || 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(data).toString(),
-      });
-
-      if (!response.ok) throw new Error(`Netlify form post failed: ${response.status}`);
-
-      setSubmitButton('fas fa-check', 'Message Sent');
-      btn.classList.add('sent');
-      form.reset();
-      Object.keys(fields).forEach(field => setError(field, ''));
-      setStatus('Thanks. Your message was sent.', 'success');
-    } catch {
-      resetSubmitButton();
-      btn.classList.remove('sent');
-      btn.disabled = false;
-      setStatus('Message could not be sent. Please email me directly.', 'error');
-      return;
-    }
-
-    setTimeout(() => {
-      resetSubmitButton();
-      btn.classList.remove('sent');
-      btn.disabled = false;
-      setStatus('');
-    }, 3000);
-  });
+async function revealScreen() {
+  wipe.classList.remove('is-covering');
+  wipe.classList.add('is-revealing');
+  await wait(WIPE_MS + WIPE_COLUMNS * 12);
+  wipe.classList.remove('is-active', 'is-revealing');
 }
 
-/* ============================================================
-   TYPING ANIMATION
-   Cycles through role strings with a typewriter effect
-   ============================================================ */
-function initTyping() {
-  const el = document.querySelector('.typing-text');
-  if (!el) return;
-  if (prefersReducedMotion()) {
-    el.textContent = 'Full-Stack Developer';
+/* ── Sound toggle ───────────────────────────────────────────── */
+function renderSoundToggle() {
+  const on = sound.enabled;
+  soundToggle.setAttribute('aria-pressed', String(on));
+  soundToggle.setAttribute('aria-label', on ? 'Sound on. Press to mute.' : 'Sound off. Press to turn on.');
+  soundToggle.querySelector('.sound-state').textContent = on ? 'ON' : 'OFF';
+}
+soundToggle.addEventListener('click', () => sound.toggle());
+sound.onChange(renderSoundToggle);
+renderSoundToggle();
+
+/* ── Scene switching ────────────────────────────────────────── */
+function announce(text) {
+  announcer.textContent = '';
+  // Re-set on the next frame so repeated identical text is still announced.
+  requestAnimationFrame(() => { announcer.textContent = text; });
+}
+
+function mountScene({ route, param }, scene) {
+  const from = active ? active.name : null;
+  active?.instance.unmount?.();
+
+  app.classList.remove('is-launching');
+  const instance = scene.mount({
+    param,
+    router,
+    sound,
+    announce,
+    openOptions: el => options.open(el),
+    setParam: value => router.setParam(route, value),
+  });
+
+  screen.replaceChildren(instance.el);
+  active = { name: route, instance, from };
+
+  progress.mark(route);
+  music.setScene(route);
+  app.dataset.scene = route;
+  hudTitle.textContent = scene.label;
+  const parent = parentOf(route);
+  hudBack.hidden = !parent;
+  if (parent) {
+    hudBack.setAttribute('href', parent === 'title' ? '#/' : `#/${parent}`);
+    hudBack.querySelector('.hud-back-label').textContent = PARENT_LABEL[parent] || 'VILLAGE';
+  }
+
+  window.scrollTo(0, 0);
+  document.title = route === 'title'
+    ? 'PLAYER ONE | Aaron Dela Cruz — Developer Portfolio'
+    : `${scene.label} | PLAYER ONE — Aaron Dela Cruz`;
+
+  // Focus the new screen (heading or primary control) for keyboard and screen-reader users.
+  instance.focus?.();
+  if (!firstRender) announce(`${scene.label} screen`);
+}
+
+async function show(target) {
+  if (busy) { pending = target; return; }
+
+  // Already on this screen (a second Start press, or only the detail param changed):
+  // never remount, just let the scene react to the new param if it cares.
+  if (active && active.name === target.route) {
+    active.instance.onParam?.(target.param);
     return;
   }
 
-  const texts = [
-    'Frontend Developer',
-    'Backend Developer',
-    'Tech Enthusiast',
-    'Problem Solver',
-    'UI/UX Craftsman',
-  ];
-  let ti = 0, ci = 0, deleting = false;
+  busy = true;
+  app.classList.add('is-busy');
 
-  function type() {
-    const current = texts[ti];
-    if (deleting) {
-      el.textContent = current.substring(0, ci - 1);
-      ci--;
-    } else {
-      el.textContent = current.substring(0, ci + 1);
-      ci++;
-    }
-
-    if (!deleting && ci === current.length) {
-      deleting = true;
-      setTimeout(type, 1800);
-      return;
-    }
-    if (deleting && ci === 0) {
-      deleting = false;
-      ti = (ti + 1) % texts.length;
-    }
-    setTimeout(type, deleting ? 55 : 105);
+  let scene;
+  try {
+    scene = await loadScene(target.route);
+  } catch (error) {
+    // Offline or a failed download: keep the current screen (or the plain-text fallback on first load).
+    console.warn('Screen failed to load:', error);
+    busy = false;
+    app.classList.remove('is-busy');
+    if (firstRender) document.documentElement.classList.remove('js-enabled');
+    else announce('That screen could not be loaded. Check your connection and try again.');
+    return;
   }
-  setTimeout(type, 900);
+
+  const animate = !firstRender && !prefersReducedMotion();
+  if (animate) await coverScreen();
+  mountScene(target, scene);
+  if (animate) await revealScreen();
+
+  firstRender = false;
+  busy = false;
+  app.classList.remove('is-busy');
+
+  if (pending) {
+    const next = pending;
+    pending = null;
+    show(next);
+  }
 }
 
-/* ============================================================
-   CURSOR GLOW  (desktop only)
-   Soft radial gradient that follows the mouse with lag
-   ============================================================ */
-function initCursorGlow() {
-  if (window.innerWidth < 1024 || prefersReducedMotion() || isLowPowerMode()) return;
-
-  const glow = document.createElement('div');
-  glow.className = 'cursor-glow';
-  document.body.appendChild(glow);
-
-  let mx = 0, my = 0, cx = 0, cy = 0;
-  let frame = 0;
-  let lastFrameTime = 0;
-
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
-
-  (function animateGlow(now = 0) {
-    frame = requestAnimationFrame(animateGlow);
-    if (document.hidden || now - lastFrameTime < 33) return;
-    lastFrameTime = now;
-    cx = lerp(cx, mx, 0.09);
-    cy = lerp(cy, my, 0.09);
-    glow.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
-  })();
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) cancelAnimationFrame(frame);
-    else frame = requestAnimationFrame(animateGlow);
-  });
-
-  // Grow on interactive elements
-  document.querySelectorAll('a, button, .project-holo-panel').forEach(el => {
-    el.addEventListener('mouseenter', () => glow.classList.add('cursor-glow--hover'));
-    el.addEventListener('mouseleave', () => glow.classList.remove('cursor-glow--hover'));
-  });
-}
-
-/* ============================================================
-   HERO MOTION
-   Decorative scroll depth for existing hero layers
-   ============================================================ */
-function initHeroMotion() {
-  if (prefersReducedMotion()) return;
-  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  gsap.to('.hero-ambient', {
-    yPercent: 8,
-    scale: 1.04,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-    },
-  });
-
-  gsap.to('.hero-grid-overlay', {
-    yPercent: -6,
-    opacity: .55,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-    },
-  });
-}
-
-/* ============================================================
-   BOOT — DOMContentLoaded
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  // Core systems
-  scrollTracker.init();
-  scrollTracker.registerSections(['hero', 'about', 'skills', 'certifications', 'projects', 'contact']);
-
-  // UI
-  initScrollReveal();
-  initScrollProgress();
-  initNavbar();
-  initSkillsBelt();
-  initContactForm();
-  initTyping();
-  initCursorGlow();
-  initHeroMotion();
+const router = createRouter(target => {
+  show(target);
 });
+
+/* ── Global keyboard handling ───────────────────────────────── */
+document.addEventListener('keydown', event => {
+  if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (isTypingTarget(event.target)) return;
+  if (busy || !active || options.isOpen) return;
+
+  if (active.instance.onKey?.(event)) {
+    event.preventDefault();
+    return;
+  }
+
+  if (event.key === 'Escape' && !ESCAPE_STAYS.has(active.name)) {
+    const parent = parentOf(active.name);
+    if (parent) {
+      event.preventDefault();
+      sound.back();
+      router.go(parent);
+    }
+  }
+});
+
+/* The HUD back link plays the back sound; the link itself does the navigation. */
+hudBack.addEventListener('click', () => sound.back());
+
+music.init();
+
+/* Warm up the village while the title screen is idle. */
+(window.requestIdleCallback || (fn => setTimeout(fn, 1500)))(() => { loadScene('world').catch(() => {}); });
+
+/* ── Go ─────────────────────────────────────────────────────── */
+router.start();

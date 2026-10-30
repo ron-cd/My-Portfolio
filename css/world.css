@@ -1,0 +1,306 @@
+/* =============================================================================
+   world.css — WALK AROUND: full-screen village, camera, hero, cat, speech bubble, D-pad, locations drawer.
+   The map is larger than the screen; --tile (set in JS) is a whole multiple of the 16 px art.
+   ============================================================================= */
+
+/* ── Full-screen village ─────────────────────────────────────
+   The screen is fixed over everything; the map inside it is larger than the
+   screen and slides under it as the hero walks (camera follows the hero).
+   --tile is set by js/scenes/world.js as a whole multiple of the 16 px art. */
+
+.app[data-scene='world'] .hud { display: none; }
+.app[data-scene='world'] .skip-link:not(:focus) { display: none; }
+
+.world-screen {
+  --tile: 96px;
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  background: #1f6b3a;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.world-viewport { position: absolute; inset: 0; overflow: hidden; }
+
+.world-map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+  background: #2f8f5b;
+  transition: transform 150ms steps(5, end);
+  -webkit-tap-highlight-color: transparent;
+}
+.world-map.no-glide { transition: none; }
+
+.world-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.world-actor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--tile);
+  height: var(--tile);
+  transform: translate(calc(var(--x) * var(--tile)), calc(var(--y) * var(--tile)));
+  transition: transform 150ms steps(5, end);
+  pointer-events: none;
+}
+
+.world-flip { position: relative; width: 100%; height: 100%; }
+.is-left .world-flip { transform: scaleX(-1); }
+
+.world-hero { z-index: 3; }
+.world-cat { z-index: 2; }
+
+.world-hero .sprite {
+  position: absolute;
+  left: 18.75%;
+  bottom: 0;
+  width: 62.5%;
+  height: 100%;
+}
+
+.world-cat .sprite {
+  position: absolute;
+  left: 25%;
+  bottom: 6%;
+  width: 50%;
+  height: 50%;
+}
+
+.world-frame-b { opacity: 0; }
+.world-hero.is-step .world-frame-a { opacity: 0; }
+.world-hero.is-step .world-frame-b { opacity: 1; }
+
+/* Building names */
+.world-label {
+  position: absolute;
+  left: calc(var(--lx) * var(--tile));
+  top: calc(var(--ly) * var(--tile));
+  transform: translate(-50%, -115%);
+  padding: 0.3em 0.6em;
+  background: rgba(7, 11, 22, 0.82);
+  box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--line);
+  font-family: var(--font-pixel);
+  font-size: calc(max(9px, var(--tile) * 0.1) * var(--type-scale));
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: var(--cream);
+  pointer-events: none;
+  z-index: 2;
+}
+.world-label.is-tall { margin-top: calc(var(--tile) * -0.8); }
+
+/* Speech bubble beside a door */
+.world-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+  min-height: 44px;
+  padding: 10px 14px;
+  background: var(--cream);
+  border: 0;
+  color: var(--ink);
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--ink), 0 6px 0 3px rgba(0, 0, 0, 0.35);
+  transform: translate(calc((var(--x) + 0.5) * var(--tile)), calc(var(--y) * var(--tile))) translate(-50%, calc(-100% - 10px));
+  transition: transform 150ms steps(5, end);
+}
+.world-bubble[hidden] { display: none; }
+.world-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  margin-left: -8px;
+  border: 8px solid transparent;
+  border-top: 8px solid var(--cream);
+  border-bottom: 0;
+}
+.world-bubble strong { font-family: var(--font-pixel); font-weight: 400; font-size: calc(10px * var(--type-scale)); letter-spacing: 0.05em; }
+.world-bubble small { font-size: 0.8125rem; color: #3a3f55; }
+.bubble-key { font-family: var(--font-pixel); font-size: calc(8px * var(--type-scale)); color: var(--red); }
+
+/* Button bar and hint */
+.world-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+.world-bar > *, .world-bar-right > * { pointer-events: auto; }
+.world-bar-right { display: flex; align-items: flex-start; gap: 4px; pointer-events: none; }
+.world-key {
+  padding: 2px 5px;
+  background: var(--ink);
+  color: var(--gold);
+  font-size: calc(8px * var(--type-scale));
+}
+@media (pointer: coarse) { .world-key { display: none; } }
+
+.world-hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 6;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  background: rgba(7, 11, 22, 0.86);
+  box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--line);
+  font-family: var(--font-pixel);
+  font-size: calc(9px * var(--type-scale));
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  color: var(--pale);
+  white-space: nowrap;
+  transition: opacity 400ms steps(4, end);
+  pointer-events: none;
+}
+.world-hint span { color: var(--gold); }
+.world-screen.has-moved .world-hint { opacity: 0; }
+@media (pointer: coarse), (max-width: 959px) { .world-hint { display: none; } }
+
+/* Left side of the bar: TITLE button and the EXPLORED counter */
+.world-bar-left { display: flex; align-items: flex-start; gap: 4px; pointer-events: none; }
+.world-bar-left > * { pointer-events: auto; }
+.world-explore {
+  margin: var(--px);
+  padding: 11px 12px;
+  background: rgba(7, 11, 22, 0.86);
+  box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--line);
+  font-family: var(--font-pixel);
+  font-size: calc(10px * var(--type-scale));
+  letter-spacing: 0.06em;
+  color: var(--pale);
+  pointer-events: none !important;
+  white-space: nowrap;
+}
+.world-explore .ex-count { color: var(--teal); }
+.world-explore.is-complete .ex-count { color: var(--gold); }
+@media (max-width: 560px) { .world-explore .ex-label { display: none; } }
+
+/* One-time "all areas explored" message */
+.world-toast {
+  position: absolute;
+  top: calc(var(--hud-h) + 12px);
+  left: 50%;
+  z-index: 7;
+  transform: translateX(-50%);
+  width: min(460px, calc(100% - 24px));
+  padding: 16px 18px;
+  background: var(--panel);
+  color: var(--cream);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--ink);
+}
+.world-toast p { margin: 0 0 10px; font-size: 0.9375rem; line-height: 1.5; }
+.toast-title { font-family: var(--font-pixel); font-size: calc(11px * var(--type-scale)) !important; letter-spacing: 0.08em; color: var(--gold); }
+.toast-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toast-actions .btn { margin: var(--px); }
+
+/* Locations drawer */
+.world-drawer {
+  position: absolute;
+  top: calc(var(--hud-h) + 8px);
+  right: max(8px, env(safe-area-inset-right));
+  bottom: 8px;
+  z-index: 9;
+  width: min(380px, calc(100% - 16px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.world-drawer[hidden] { display: none; }
+.world-drawer-close { margin-top: 14px; width: 100%; justify-content: center; }
+
+/* ── On-screen arrows: shown on touch screens and narrow windows ── */
+.dpad { display: none; }
+
+@media (pointer: coarse), (max-width: 959px) {
+  .dpad {
+    position: absolute;
+    left: max(14px, env(safe-area-inset-left));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 6;
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(2, 56px);
+    gap: 6px;
+    margin: 0;
+  }
+  .world-screen.has-drawer .dpad { display: none; }
+  .dpad-up { grid-area: 1 / 2; }
+  .dpad-left { grid-area: 2 / 1; }
+  .dpad-down { grid-area: 2 / 2; }
+  .dpad-right { grid-area: 2 / 3; }
+}
+
+.dpad-btn {
+  position: relative;
+  opacity: 0.92;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: var(--panel-2);
+  border: 0;
+  color: var(--cream);
+  cursor: pointer;
+  box-shadow:
+    inset 0 calc(var(--px) * -1) 0 0 rgba(0, 0, 0, 0.3),
+    0 0 0 var(--px) var(--line);
+}
+.dpad-btn:active { transform: translateY(2px); background: var(--line); }
+.dpad-btn span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 9px solid transparent;
+}
+.dpad-up span { border-bottom: 12px solid currentColor; border-top: 0; transform: translate(-50%, -60%); }
+.dpad-down span { border-top: 12px solid currentColor; border-bottom: 0; transform: translate(-50%, -40%); }
+.dpad-left span { border-right: 12px solid currentColor; border-left: 0; transform: translate(-60%, -50%); }
+.dpad-right span { border-left: 12px solid currentColor; border-right: 0; transform: translate(-40%, -50%); }
+
+/* ── Locations ── */
+.loc-list { display: grid; gap: 8px; }
+
+.loc {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border: 0;
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+.loc:hover { background: var(--line); }
+.pref-calm .world-map, .pref-calm .world-bubble, .pref-calm .world-actor { transition: none; }
+.loc-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; }
+.loc-icon .sprite { width: 24px; height: 24px; }
+.loc-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.loc-text strong {
+  font-family: var(--font-pixel);
+  font-size: calc(10px * var(--type-scale));
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+.loc-text small { color: var(--muted); font-size: 0.8125rem; }
+.loc-check .sprite { width: 16px; height: 16px; }
+.world-help { margin-top: 14px; font-size: 0.875rem; }

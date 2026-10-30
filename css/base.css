@@ -1,469 +1,168 @@
 /* =============================================================================
-   base.css — Fonts, Design Tokens, Reset & Global Utilities
-   Author  : Aaron Dela Cruz
-   Updated : 2026
-
-   TABLE OF CONTENTS
-   ─────────────────────────────────────────────────────────────────────────────
-   0. Fonts           — @import (Google Fonts) + font-family tokens
-                        ★ THIS IS THE ONLY PLACE YOU NEED TO CHANGE FONTS ★
-   1. Design Tokens   — Colours, motion, spacing, and layout vars
-   2. Reset           — Box-model, typography defaults, focus & selection styles
-   3. Preloader       — Full-screen loading spinner (.preloader / .preloader-ring)
-   4. Cursor Glow     — Desktop-only radial cursor effect (.cursor-glow)
-   5. Scroll Reveal   — GSAP-driven reveal classes (.reveal, .reveal-left …)
-   6. Layout Utils    — .container, .section-inner, z-index stacking
-   7. Typography      — .section-label, .section-title, .gradient-text
-   8. Buttons         — .btn, .btn-primary, .btn-ghost, .btn-sm
-   9. Tag Pill        — .tag inline code/tech label
-   10. Reduced Motion  — Blanket animation override for prefers-reduced-motion
-   ─────────────────────────────────────────────────────────────────────────────
-   QUICK EDITS:
-     • Swap fonts       → §0 FONTS — change the @import URL + the three --font-* tokens
-     • Brand colours    → §1 DESIGN TOKENS — --clr-accent / --clr-accent-2 / --clr-accent-3
-     • Container width  → §1 DESIGN TOKENS — --container-max
-     • Nav height       → §1 DESIGN TOKENS — --nav-height
+   base.css — Reset, typography, accessibility helpers.
    ============================================================================= */
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §0  FONTS
-   ───────────────────────────────────────────────────────────────────────────
-   HOW TO CHANGE FONTS
-   ────────────────────
-   1. Pick new families on https://fonts.google.com
-   2. Copy the @import URL they give you and replace the one below.
-   3. Update the three --font-* tokens in §1 DESIGN TOKENS to match.
-   That's it — every component reads from those tokens, so nothing else
-   needs to change.
-
-   CURRENT FAMILIES
-   ────────────────────
-   Display : Syne         (headings, nav, buttons)       weights: 400 600 700 800
-   Body    : DM Sans      (paragraphs, descriptions)     weights: 300 400 500  (opsz 9..40)
-   Mono    : JetBrains Mono (code labels, kickers, tags) weights: 400 500
-
-   SWAP EXAMPLE — replacing Syne with Inter for display:
-     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800...');
-     --font-display: 'Inter', sans-serif;
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap');
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §1  DESIGN TOKENS  — single source of truth for the whole site
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-:root {
-  /* Colours */
-  --clr-bg: #060912;
-  --clr-bg-2: #0a0e1c;
-  --clr-bg-3: #10182b;
-  --clr-bg-deep: #02050b;
-  --clr-surface: rgba(232, 237, 248, 0.045);
-  --clr-surface-2: rgba(232, 237, 248, 0.075);
-  --clr-surface-3: rgba(232, 237, 248, 0.11);
-  --clr-border: rgba(232, 237, 248, 0.095);
-  --clr-border-2: rgba(108, 176, 235, 0.24);
-  --clr-text: #e8edf8;
-  --clr-text-muted: #7a8aaa;
-  --clr-text-dim: #3d4a63;
-  --clr-accent: #64b5f6;
-  --clr-accent-2: #7d719d;
-  --clr-accent-3: #00d4aa;
-  --clr-glow: rgba(100, 181, 246, 0.22);
-  /* Typography — mirror the families imported in §0 FONTS above */
-  --font-display: 'Syne', sans-serif;
-  /* headings, nav, labels, buttons  */
-  --font-body: 'DM Sans', sans-serif;
-  /* body copy, descriptions         */
-  --font-mono: 'JetBrains Mono', monospace;
-  /* kickers, tags, code, percentages */
-  /* Motion */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --transition-fast: 160ms var(--ease-out);
-  --transition-normal: 280ms var(--ease-out);
-  --transition-spring: 420ms var(--ease-out);
-  /* Shape */
-  --radius-sm: 6px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
-  --radius-full: 9999px;
-  /* Layout */
-  --nav-height: 72px;
-  --container-max: 1180px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §2  RESET
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
-  scroll-behavior: smooth;
-  font-size: 16px;
+  font-size: calc(100% * var(--ts-big));
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--void);
+  scroll-behavior: auto;
 }
 
 body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--void);
+  color: var(--cream);
   font-family: var(--font-body);
-  background: var(--clr-bg-deep);
-  color: var(--clr-text);
-  overflow-x: hidden;
+  font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-  opacity: .13;
-  background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .8) 0 1px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(100, 181, 246, .7) 0 1px, transparent 1px);
-  background-size: 180px 180px, 260px 260px;
-  mix-blend-mode: screen;
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure {
+  margin: 0;
 }
 
-img,
-video {
-  max-width: 100%;
-  display: block;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-family: inherit;
-}
-
-ul,
-ol {
+ul, ol {
+  padding: 0;
   list-style: none;
 }
 
-input,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
+a {
+  color: var(--teal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-:focus-visible {
-  outline: 2px solid var(--clr-accent);
-  outline-offset: 4px;
+a:hover {
+  color: var(--cream);
 }
 
-::selection {
-  color: var(--clr-bg-deep);
-  background: var(--clr-accent);
+button {
+  font: inherit;
+  color: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Pixel sprites stay crisp at any integer scale. */
+.sprite {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+/* ── Accessibility helpers ─────────────────────────────────── */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip-link {
   position: fixed;
-  left: 1rem;
-  top: 1rem;
-  z-index: 10000;
-  transform: translateY(-140%);
-  padding: .7rem 1rem;
-  border-radius: var(--radius-md);
-  background: var(--clr-text);
-  color: var(--clr-bg-deep);
-  font-family: var(--font-display);
-  font-weight: 700;
-  transition: transform var(--transition-fast);
+  left: 12px;
+  top: -80px;
+  z-index: 100;
+  padding: 12px 16px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: calc(11px * var(--type-scale));
+  text-decoration: none;
 }
 
 .skip-link:focus {
-  transform: translateY(0);
+  top: 12px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   §3  PRELOADER  — shown until body.loaded class is added (js/main.js)
-   Edit: preloader-text string in index.html, timing in main.js setTimeout
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.preloader {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--clr-bg-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.7s ease 0.4s;
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
 }
 
-body.loaded .preloader {
-  opacity: 0;
-  pointer-events: none;
+/* Elements focused only by script (headings, panels) do not need a ring. */
+[tabindex='-1']:focus {
+  outline: none;
 }
 
-html.no-js .preloader {
-  animation: noJsPreloaderFallback .01s linear 1.2s forwards;
+::selection {
+  background: var(--teal-dim);
+  color: var(--cream);
 }
 
-.preloader-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.preloader-ring {
-  width: 56px;
-  height: 56px;
-  border: 2px solid var(--clr-border);
-  border-top-color: var(--clr-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-.preloader-text {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--clr-text-muted);
-  text-transform: uppercase;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes noJsPreloaderFallback {
-  to {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §4  CURSOR GLOW  — desktop only, injected by js/main.js initCursorGlow()
-   Edit: size (360px), blend mode, hover colour below
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.cursor-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--clr-glow) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-  mix-blend-mode: screen;
-  transform: translate(-50%, -50%);
-}
-
-.cursor-glow--hover {
-  background: radial-gradient(circle, rgba(100, 180, 255, 0.4) 0%, transparent 65%);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §5  SCROLL REVEAL
-   Classes are visible by default; GSAP animates FROM opacity:0 on scroll.
-   Add class="reveal" / "reveal-left" / "reveal-right" to any element.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Reveal classes are visible by default; GSAP handles the from-state. */
-
-.no-js .reveal,
-.no-js .reveal-child,
-.no-js .reveal-left,
-.no-js .reveal-right {
-  opacity: 1;
-  transform: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §6  LAYOUT UTILITIES
-   .container  → max-width wrapper (--container-max = 1180px)
-   .section-inner → vertical padding for page sections
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.container {
-  max-width: var(--container-max);
+/* Static fallback shown only when JavaScript is not running. */
+.static-fallback {
+  max-width: 640px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 48px 20px;
 }
 
-.section-inner {
-  padding: clamp(5.5rem, 10vw, 8.5rem) 0;
+.static-fallback h1,
+.static-fallback h2 {
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--gold);
+  margin: 24px 0 12px;
 }
 
-@media (max-width: 768px) {
-  .section-inner {
-    padding: 5rem 0;
-  }
+.static-fallback ul {
+  list-style: square;
+  padding-left: 1.25rem;
 }
 
-/* Section content above satellite (z-index:1) */
-
-section .container,
-section > .section-inner,
-.footer > .container {
-  position: relative;
-  z-index: 2;
+.static-fallback li {
+  margin: 4px 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   §7  TYPOGRAPHY HELPERS
-   Edit: .section-title font-size clamp() for heading scale
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.section-label {
-  font-family: var(--font-mono);
-  font-size: .75rem;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--clr-accent);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.js-enabled .static-fallback {
+  display: none;
 }
 
-.section-label::before {
-  content: '';
-  display: block;
-  width: 28px;
-  height: 1px;
-  background: var(--clr-accent);
-}
-
-.section-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  line-height: 1.04;
-  color: var(--clr-text);
-  text-wrap: balance;
-}
-
-.section-title-spaced {
-  margin-bottom: 1.5rem;
-}
-
-.section-head {
-  max-width: 760px;
-  margin-bottom: 2.5rem;
-}
-
-.section-head-center {
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.section-head-center .section-label {
-  justify-content: center;
-}
-
-.section-head-loose {
-  margin-bottom: 4rem;
-}
-
-.gradient-text {
-  color: var(--clr-accent);
-  -webkit-text-fill-color: currentColor;
-  background: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §8  BUTTONS
-   .btn-primary  → solid accent gradient CTA
-   .btn-ghost    → outlined/transparent variant
-   .btn-sm       → small size modifier
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .8rem 1.6rem;
-  border-radius: var(--radius-full);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: .9rem;
-  letter-spacing: .03em;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
-  color: var(--clr-text);
-  box-shadow: 0 4px 24px var(--clr-glow);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 32px var(--clr-glow);
-}
-
-.btn:active {
-  transform: scale(.97);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--clr-text);
-  border: 1px solid var(--clr-border-2);
-}
-
-.btn-ghost:hover {
-  border-color: var(--clr-accent);
-  color: var(--clr-accent);
-  transform: translateY(-2px);
-}
-
-.btn-sm {
-  padding: .5rem 1rem;
-  font-size: .8rem;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   §9  TAG PILL  — tech stack / keyword chips (.tag)
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.tag {
-  display: inline-block;
-  padding: .25rem .75rem;
-  border-radius: var(--radius-full);
-  background: var(--clr-surface);
-  border: 1px solid var(--clr-border);
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  color: var(--clr-text-muted);
-}
+/* ── Reduced motion: everything is shown in its final state ── */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
+    transition: none !important;
     scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
   }
+}
+
+/* CALM MOTION option: the same as the device setting, chosen inside the site. */
+html.pref-calm *,
+html.pref-calm *::before,
+html.pref-calm *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }

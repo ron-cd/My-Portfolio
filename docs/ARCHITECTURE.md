@@ -1,122 +1,104 @@
 # Architecture
 
-This portfolio is a static site with focused JavaScript modules. There is no bundler and no framework runtime.
+PLAYER ONE is a single-page app made of small ES modules. There is no bundler and no dependency.
 
-## Runtime Layers
+## Shell and scenes
+
+`index.html` contains one persistent shell:
 
 ```text
-index.html
-|-- html/lab-activities.html
-|-- css/base.css             - tokens, reset, utilities
-|-- css/space.css            - space background and satellite canvas defaults
-|-- css/sections.css         - main section and component styles
-|-- css/lab-activities.css   - lab archive page styles
-|-- libs/gsap.min.js         - GSAP core
-|-- libs/ScrollTrigger.min.js
-|-- libs/three.min.js        - Three.js r128 UMD build
-|-- libs/OBJLoader.js
-|-- js/boot.js               - preloader and footer year
-|-- js/space-bg.js           - canvas starfield
-|-- js/satellite.js          - Three.js satellite renderer
-`-- js/main.js               - entry point (type="module")
-    |-- imports utils.js
-    |-- imports scroll.js
-    `-- imports animation.js
+#app
+├── #stage     generated pixel-art scene (sky follows the clock) (js/core/scene.js), dimmed on inner screens
+├── .hud       back button, screen name, sound toggle
+├── #screen    <main>: the active scene is mounted here
+├── #wipe      pixel-bar transition layer
+└── #announcer polite live region for screen changes
 ```
 
-## CSS Responsibilities
-
-| File | Purpose | Edit when… |
-|---|---|---|
-| `base.css` | Design tokens, reset, typography helpers, buttons, containers | Changing brand colours, fonts, or global spacing |
-| `space.css` | Fixed background layer and satellite loader defaults | Adjusting starfield or satellite loading UI |
-| `sections.css` | Section layouts, all components, responsive hardening | Adding or styling new sections/components |
-| `lab-activities.css` | Lab archive page layout | Editing the standalone lab archive page |
-
-Production breakpoint overrides live late in `sections.css` and intentionally override component defaults.
-
-**CSS Table of Contents** (in `sections.css`):
-1. Navbar
-2. Hero
-3. About
-4. Skills
-5. Contact
-6. Footer
-7. Certifications
-8. Premium About (orbit card)
-9. Skills Belt
-10. Projects — Hologram Projection Interface
-11. Responsive Hardening (1440px → 380px + landscape)
-
-## JavaScript Responsibilities
-
-| File | Purpose |
-|---|---|
-| `main.js` | App boot: navbar, typing text, contact form, cursor glow, hero parallax |
-| `animation.js` | GSAP scroll reveals, cert gallery, projects hologram |
-| `boot.js` | No-module boot helpers: preloader class and footer year |
-| `satellite.js` | Three.js satellite renderer, model loading, drag rotation, scroll path |
-| `space-bg.js` | Canvas starfield, nebulae, Milky Way, shooting stars |
-| `scroll.js` | Scroll progress tracking, active-section detection, `sectionChange` events |
-| `utils.js` | Shared math/motion helpers: `lerp`, `clamp`, `debounce`, `prefersReducedMotion` |
-
-## Z-Index Model
-
-| Layer | z-index | Purpose |
-|---|---|---|
-| Space background | -2 to -1 | Gradients and canvas starfield |
-| Satellite canvas | 1 | Fixed Three.js satellite |
-| Section content | 2+ | Readable UI above decorative layers |
-| Navbar | 100 | Persistent navigation |
-| Preloader | 9999 | Initial loading screen |
-| Skip link | 10000 | Accessibility shortcut |
-
-Avoid adding `z-index` directly to full `<section>` elements unless necessary. Section-level stacking contexts can trap the satellite behind content.
-
-## Satellite System
-
-`js/satellite.js` owns the Three.js satellite. It loads `assets/satellite/Satellite.obj`, applies the texture maps in `assets/satellite/textures/`, and animates a fixed canvas through GSAP ScrollTrigger.
-
-Three responsive waypoint profiles:
-- `WAYPOINTS.desktop`
-- `WAYPOINTS.tablet`
-- `WAYPOINTS.mobile`
-
-**Rule:** All profiles must have the same number of waypoints with matching `p` values. ScrollTrigger safely refreshes positions on viewport change.
+`js/main.js` owns the shell. A **scene** is a module that exports:
 
 ```js
-// Example waypoint shape
-{ p: 0.60, x: 0.88, y: 0.70, rotZ: -52, scale: 0.72 }
-// p     = page scroll progress [0..1]
-// x, y  = viewport fractions
-// rotZ  = canvas tilt in degrees
-// scale = responsive visual size multiplier
+export const label = 'SKILL TREE';          // shown in the HUD
+export function mount(ctx) {                 // ctx: { param, router, sound, announce, setParam }
+  return {
+    el,                                      // DOM to place in #screen
+    focus(),                                 // where focus lands after opening
+    unmount(),                               // cleanup
+    onKey(event),                            // return true if you handled the key
+    onParam(param),                          // optional: react to #/route/<param> without remounting
+  };
+}
 ```
 
-**Rule:** Do not add GSAP tweens that animate `x`, `y`, `scale`, or `rotation` on `#sat-canvas`. ScrollTrigger owns those transform properties.
+Adding a screen means: create `js/scenes/yours.js`, register it in `SCENES` (and `PARENT`) in `main.js`, add its name to `ROUTES` in `js/core/router.js`, and add an entry in `menuItems` in `js/data/site.js` (used by the village's LOCATIONS drawer and the plain summary). A screen that should count toward the EXPLORED bar also goes in `AREAS` (`js/core/settings.js`); a screen with a building in the village needs an entry in `js/data/world.js` too (the validator reminds you).
 
-## GSAP Reveal System
+## Routing
 
-`animation.js` uses `fromTo` animations for scroll reveals. If GSAP is unavailable, the site keeps content visible and skips pinned scroll effects.
+Only `title.js` is imported statically; the other scenes are loaded with `import()` through `LOADERS` in `main.js` the first time they are shown. Styles are joined into `css/player-one.css` by `scripts/build-css.mjs`; edit the files in `css/`, then run `npm run css`.
 
-## Projects — Hologram Interface
+Hash routes work on any static host: `#/` (title), `#/profile`, `#/skills`, `#/quests`, `#/achievements`, `#/contact`, `#/world` (village, the hub; the old `#/menu` redirects here with `replaceState`) and `#/summary` (plain recruiter page, not part of the game menu). Screen changes push history entries, so browser Back and Forward work. Selecting a certification or quest updates the URL (`#/skills/databases`) with `replaceState`, so deep links work without polluting history.
 
-The projects section uses a hologram projection interface (`#projects-dock`):
+## Transitions and focus
 
-- **Desktop:** GSAP-pinned stage. Scrolling through the section cycles between projects.
-- **Mobile (`≤760px`):** All project panels are shown in a stacked layout (no pin).
+`show()` in `main.js` covers the screen with 16 pixel bars, swaps the scene, then reveals it. Requests that arrive mid-transition are coalesced, so double presses never stack animations. With `prefers-reduced-motion`, the wipe is skipped. After each change, focus moves to the new screen heading (or primary control) and a live region announces the screen.
 
-The Three.js hologram canvas (`#projects-hologram-canvas`) renders a rotating orbit sphere that responds to mouse position and changes colour per project.
+Keyboard handling is global but polite: it ignores modified keys and text inputs, gives the active scene first refusal, and only then treats Escape as "go back".
 
-**To add a project:** Copy an existing `<article class="project-holo-panel">` block in `index.html` and update:
-- `data-holo-color`, `data-holo-accent`
-- `data-holo-label-a/b/c` (appear in the hologram visual)
-- Kicker text, title, description, metadata, tech tags, and action buttons
-- Add a corresponding dot button in `.project-holo-progress`
+## Pixel art
 
-## Certifications Gallery
+Nothing is a raster image.
 
-The certifications section uses a GSAP-pinned card-stack (`initCertGallery` in `animation.js`):
+- `js/core/sprites.js`: sprites are arrays of palette characters, rendered to inline SVG (one `<path>` per colour, `shape-rendering: crispEdges`).
+- `js/core/scene.js`: the background (sky bands, stars, moon, skyline, hills, pines, terminal, hero) is generated on a 192 × 108 grid with a seeded random generator.
 
-- **Desktop:** Cards stack with 3D transforms as you scroll.
-- **Mobile (`≤768px`):** Falls back to a flat grid (`.cert-stack-compact` class applied).
+- `js/core/settings.js`: local preferences (scanlines, always-night, comfort options) and exploration progress, both in `localStorage` behind try/catch, plus `currentSky()`.
+- `js/ui/bookart.js`: the quest-book illustrations.
+
+## Skill tree
+
+`js/data/certifications.js` is a graph: unique ids, `x`/`y` in a 1000 × 650 logical space, and explicit `connections`. The player sits at the hub; four branches leave it on diagonal spokes and continue along horizontal rows. `js/scenes/skilltree.js` renders:
+
+- **Radial tree (≥ 960px):** node buttons positioned in percent over an SVG with the same viewBox, so connectors always meet their nodes. Diamond frames show status (earned, in progress, planned). Q / E swap branch, arrow keys move between nodes.
+- **List (< 960px):** the same data as branches; the detail panel becomes a bottom sheet with a basic focus trap.
+- **Detail panel:** beside the tree at ≥ 1400px, below it otherwise, so opening it never moves a node.
+
+## Achievements (badge wall)
+
+`js/data/achievements.js` holds manual achievements; certifications and completed quests are generated from their own data files. `js/ui/badge.js` turns each one into a pixel-art badge (shape per group, emblem sprite, locked variant for in-progress quests). `js/scenes/achievements.js` lays them on wooden shelves, one per group, with the same detail window / bottom sheet pattern as the skill tree (`.item-window` in `css/skilltree.css`).
+
+## Recruiter summary and SEO
+
+`js/scenes/summary.js` builds a plain page from the same data files, so it cannot disagree with the game. `css/summary.css` has an `@media print` block (white paper, no HUD or buttons, link URLs printed).
+
+`scripts/build-seo.mjs` regenerates two marked regions of `index.html` from `js/data`: the schema.org JSON-LD (`ProfilePage` + `Person`) and the no-JavaScript fallback. `npm test` runs it with `--check`, so a stale `index.html` fails the build; `npm run seo` rewrites it.
+
+## Village (Walk Around)
+
+- `js/data/world.js`: tile coordinates (32 × 20) for roads (rectangles), buildings, doors, trees, lamps, the lake and flowers.
+- `js/core/worldmap.js`: pure grid logic (blocked tiles, roads, the path from each door down to the nearest road, breadth-first pathfinding). No DOM, so `validate-data.mjs` loads it and checks that every door can be reached.
+- `js/ui/worldart.js`: draws the whole village as one SVG from rectangles and sprites; the sky tints it and lights the windows.
+- `js/scenes/world.js`: the full-screen village. The map is larger than the screen; a camera keeps the hero centred by moving the map with one CSS `transform` (same 150 ms stepped transition as the hero, so there is no animation loop). `--tile` is set in JS to a whole multiple of the 16 px art (about 15 tiles across the screen). Movement: arrows / WASD / D-pad / tap / LOCATIONS drawer (key `L`). Held keys are ignored (`event.repeat`), so one press is one tile. An EXPLORED n/5 chip sits in the bar, with a one-time "all explored" message. It shows a speech bubble next to doors, building name labels, a visually hidden live region for screen readers, and visited flags. The shell's top HUD is hidden on this screen (`css/world.css`), so the scene has its own TITLE / LOCATIONS / OPTIONS buttons (`#options-btn` does not exist there, so tests open Options from another screen) (`ctx.openOptions`). Screens entered from the village return to it (`PARENT` in `main.js`). Esc in the village only closes the drawer or message (`ESCAPE_STAYS`).
+- `js/scenes/profile.js`: the equipment screen (hero, gear slots from `profile.gear`, stats strip, and a PLAYER STATS view with the written profile). "Used in" lines are worked out from `projects.js`.
+- `js/scenes/contact.js`: the post office letter (quest-type chips, stamps for links, CV package, COPY EMAIL).
+
+## Title-screen hot-spots
+
+`js/ui/scenehits.js` places real `<button>`s over the cat, hero and terminal by applying the scene's own `preserveAspectRatio` maths to anchor rectangles that `scene.js` publishes in `data-anchors`. Keyboard and screen-reader users get the same actions; the cat's lines are announced.
+
+## Options, progress, and the sky
+
+`js/ui/options.js` builds a modal dialog (focus trap, Esc to close, focus returns to the gear button). While it is open the shell ignores global keys. `progress.mark(route)` runs on every scene mount; the village chip subscribes to changes so reset updates it live. The shell rebuilds the background scene when the sky setting changes.
+
+## Comfort options
+
+`settings.js` mirrors preferences onto `<html>` as classes (`pref-big`, `pref-readable`, `pref-contrast`, `pref-calm`, `crt-on`). `css/comfort.css` reacts to them: every pixel font size in the CSS is written `calc(Npx * var(--type-scale))`, so one variable scales (and, for readable mode, swaps) all text; contrast overrides the colour tokens; calm mode uses the same rules as `prefers-reduced-motion`, and `prefersReducedMotion()` in `dom.js` returns true for either.
+
+## Sound and music
+
+`js/core/audio.js` synthesises tiny square-wave blips with Web Audio. It is off by default, only creates an `AudioContext` after the visitor turns sound on, and remembers the choice in `localStorage` (guarded by try/catch).
+
+`js/core/music.js` is a separate, opt-in switch. Four original loops are written as data (`THEMES`: `village`, `morning`, `afternoon`, `night`, each with a `level` that evens out loudness) and played by a look-ahead scheduler: square lead, triangle bass, faint arpeggio, through a low-pass filter at a low master gain. A saved "on" waits for the first click or key press (browser autoplay rules); the loop pauses when the tab is hidden; `setScene()` is called by the shell: in the village the Cozy Village tune plays; elsewhere the tune follows the sky (dawn/day = morning, dusk = afternoon, night = night). Tunes switch at a loop or bar boundary.
+
+## Fallbacks
+
+`#screen` ships with a static HTML version of the whole portfolio (contact, about, education, skills, projects, certifications, recognition), generated by `scripts/build-seo.mjs`. It is replaced when JavaScript starts and stays visible if the module fails to load.
