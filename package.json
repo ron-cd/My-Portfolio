@@ -1,0 +1,26 @@
+{
+  "name": "my-portfolio",
+  "version": "1.0.0",
+  "description": "PLAYER ONE: a retro 16-bit RPG developer portfolio built with dependency-free HTML, CSS, and ES modules.",
+  "main": "index.html",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "check": "node scripts/check-static-site.js && node scripts/validate-data.mjs && node scripts/build-seo.mjs --check && node scripts/build-css.mjs --check",
+    "seo": "node scripts/build-seo.mjs",
+    "serve": "node scripts/serve-static.js",
+    "test": "npm run check",
+    "css": "node scripts/build-css.mjs"
+  },
+  "keywords": [
+    "portfolio",
+    "retro",
+    "pixel-art",
+    "rpg",
+    "skill-tree",
+    "vanilla-js"
+  ],
+  "author": "Aaron Dela Cruz",
+  "license": "MIT"
+}

@@ -1,0 +1,69 @@
+/* =============================================================================
+   comfort.css — Visitor comfort options (OPTIONS window).
+   Each rule below is switched by a class that settings.js puts on <html>:
+     pref-big       larger text           pref-contrast  high contrast
+     pref-readable  plain sans-serif UI   pref-calm      no animation (base.css)
+   ============================================================================= */
+
+/* ── Larger text: --ts-big scales rem text (via html) and every px size ── */
+html.pref-big { --ts-big: 1.2; }
+
+/* ── Readable text: swap the pixel font for the body font, and scale up
+      because the body font is smaller at the same size. ── */
+html.pref-readable {
+  --ts-read: 1.3;
+  --font-pixel: var(--font-body);
+}
+
+html.pref-readable :is(h1, h2, h3, button, .btn, .tag, .badge, [class*='label'], [class*='title'], [class*='name'], dt) {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* The big PLAYER ONE logo is artwork, so it keeps its pixel font. */
+html.pref-readable .logo-letter,
+html.pref-readable .title-logo {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+/* ── High contrast ── */
+html.pref-contrast {
+  --void: #000;
+  --night: #050914;
+  --panel: #0a1022;
+  --panel-2: #16213f;
+  --line: #9db2e6;
+  --ink: #000;
+  --teal: #55e6cf;
+  --teal-dim: #138a79;
+  --gold: #ffd35c;
+  --cream: #fff;
+  --pale: #f2f5ff;
+  --muted: #d7deef;
+}
+
+/* The picture behind the windows is dimmed further so text never fights it. */
+html.pref-contrast .app:not([data-scene='title']):not([data-scene='boot']) .stage-dim { opacity: 0.97 !important; }
+html.pref-contrast .title-tag,
+html.pref-contrast .title-hint,
+html.pref-contrast .title-greeting { background: #000; }
+
+html.pref-contrast :focus-visible {
+  outline: 4px solid #fff !important;
+  box-shadow: 0 0 0 7px #000 !important;
+}
+
+html.pref-contrast a { text-decoration-thickness: 3px; }
+
+html.pref-contrast .sum-sheet {
+  --paper: #fff;
+  --paper-ink: #000;
+  --paper-muted: #1d2230;
+  --paper-rule: #000;
+  --paper-link: #00403a;
+}
+
+/* Pixel-style drop shadows turn plain letters into doubled, blurry ones. */
+html.pref-readable :not(.title, .title *) { text-shadow: none; }

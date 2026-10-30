@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity 1</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            color: rgb(0, 0, 0);
+        }
+
+        nav {
+            background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(255,255,0,1) 100%);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            height: 60px;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(255, 230, 6, 0.704);
+        }
+
+        nav h1 {
+            margin-top: 0;
+            padding-top: 10px;
+            padding-left: 3%;
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .page-title {
+            color: black;
+            margin: 20px 0 0 49px;
+            font-weight: 400;
+            font-size: 1.5rem;
+        }
+
+        .main-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 110px;
+            padding: 10px 49px 50px 49px;
+        }
+
+
+        .form-section {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            background-color: #ffffff;
+        }
+
+        .form-section h2 {
+            color: #333333;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #000000;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+
+        .form-group label .required {
+            color: #d67a7c;
+        }
+
+        .form-group select,
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="date"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+        }
+
+        .form-note {
+            color: #b8860b;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #cccccc;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 360px;
+            flex-shrink: 0;
+            padding-top: 30px;
+            margin-right: 30px;
+        }
+
+        .alert-container {
+            padding: 25px;
+            background-color: #d67a7c;
+            border-radius: 10px;
+        }
+
+        .alert-content {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .alert-content b,
+        .alert-content strong {
+            font-size: larger;
+            font-weight: 500;
+        }
+
+        .data-privacy-container {
+            padding: 30px;
+            background-color: #7aa5d6;
+            border-radius: 10px;
+        }
+
+        .privacy-content {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .privacy-content b {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .privacy-content label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .privacy-content input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #8cd67a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+
+        #submit-btn:hover {
+            background-color: #72c460;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <h1>Activity 1</h1>
+    </nav>
+
+    <h1 class="page-title">Online Application</h1>
+
+    <div class="main-layout">
+
+        <div class="form-section">
+            <h2>Application Term &amp; Course/Strand</h2>
+
+            <div class="form-group">
+                <label>Campus:<span class="required">*</span></label>
+                <select name="campus" required>
+                    <optgroup label="National Capital Region (NCR)">
+                        <option>NU Manila</option>
+                        <option>NU Nazareth</option>
+                        <option>NU Fairview</option>
+                        <option>NU MOA</option>
+                        <option>NU East Ortigas</option>
+                        <option>NU Las Piñas</option>
+                    </optgroup>
+                    <optgroup label="Region III (Central Luzon)">
+                        <option>NU Baliwag</option>
+                        <option>NU Clark</option>
+                    </optgroup>
+                    <optgroup label="Region IV-A (Calabarzon)">
+                        <option>NU Laguna</option>
+                        <option>NU Dasmariñas</option>
+                        <option>NU Lipa</option>
+                    </optgroup>
+                    <optgroup label="Region VII (Central Visayas)">
+                        <option>NU Cebu</option>
+                    </optgroup>
+                    <optgroup label="Region XI (Davao Region)">
+                        <option>NU Davao</option>
+                    </optgroup>
+                    <optgroup label="Region XVIII (Negros Island Region)">
+                        <option>NU Bacolod</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Academic Year:<span class="required">*</span></label>
+                    <select name="school-year" required>
+                        <option>2026 - 2027</option>
+                        <option>2028 - 2029</option>
+                        <option>2029 - 2030</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Academic Term:<span class="required">*</span></label>
+                    <select name="term" required>
+                        <option>1st</option>
+                        <option>2nd</option>
+                        <option>3rd</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Applying For:<span class="required">*</span></label>
+                <select name="applying-for" required>
+                    <option value="" disabled selected hidden>Choose a level...</option>
+                    <optgroup label="Senior High School (SHS)">
+                        <option value="grade-11">Grade 11</option>
+                        <option value="grade-12">Grade 12</option>
+                    </optgroup>
+                    <optgroup label="Higher Education">
+                        <option value="freshman">Freshman</option>
+                        <option value="transferee">Transferee</option>
+                        <option value="second-degree">Second Degree Taker</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Academic Program:<span class="required">*</span></label>
+                <select name="academic-program" required>
+                    <option value="" disabled selected hidden>Choose a program...</option>
+                    <optgroup label="Senior High School">
+                        <option>COMPUTING AND TECHNOLOGIES (STEM_CT)</option>
+                        <option>EDUCATION, ARTS AND SOCIAL SCIENCES (AHSS_EASS)</option>
+                        <option>ENGINEERING AND ARCHITECTURE (STEM_EA)</option>
+                        <option>MANAGEMENT AND ACCOUNTANCY (BUEN_MA)</option>
+                        <option>SCIENCES AND ALLIED HEALTH (STEM_SAH)</option>
+                    </optgroup>
+                    <optgroup label="School of Education, Arts and Sciences (SEAS)">
+                        <option>BACHELOR OF ARTS IN COMMUNICATION (ABComm)</option>
+                        <option>BACHELOR OF ARTS IN POLITICAL SCIENCE (BaPolSci)</option>
+                        <option>BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY (BSMT)</option>
+                        <option>BACHELOR OF SCIENCE IN PSYCHOLOGY (BSPsy)</option>
+                        <option>DOCTOR OF DENTAL MEDICINE (DMD)</option>
+                    </optgroup>
+                    <optgroup label="School of Accountancy, Business and Management (SABM)">
+                        <option>BACHELOR OF SCIENCE IN ACCOUNTANCY (BSAccountancy)</option>
+                        <option>BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT (BSBA-MktgMgmt)</option>
+                        <option>BACHELOR OF SCIENCE IN MANAGEMENT ACCOUNTING (BSMA)</option>
+                        <option>BACHELOR OF SCIENCE IN TOURISM MANAGEMENT (BSTM)</option>
+                    </optgroup>
+                    <optgroup label="School of Engineering, Architecture and Technology (SEAT)">
+                        <option>BACHELOR OF SCIENCE IN ARCHITECTURE (BSArch)</option>
+                        <option>BACHELOR OF SCIENCE IN CIVIL ENGINEERING (BSCE)</option>
+                        <option>BACHELOR OF SCIENCE IN COMPUTER ENGINEERING (BSCpE)</option>
+                        <option>BACHELOR OF SCIENCE IN COMPUTER SCIENCE WITH SPECIALIZATION IN ARTIFICIAL INTELLIGENCE (BSCS)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <span class="form-note">Note: Academic Program options will be based on the selected course/strand.</span>
+
+            <hr>
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name:<span class="required">*</span></label>
+                    <input type="text" name="first-name" required placeholder="Juan">
+                </div>
+                <div class="form-group">
+                    <label>Middle Name:</label>
+                    <input type="text" name="middle-name" placeholder="Santos">
+                </div>
+                <div class="form-group">
+                    <label>Last Name:<span class="required">*</span></label>
+                    <input type="text" name="last-name" required placeholder="Dela Cruz">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth:<span class="required">*</span></label>
+                <input type="date" name="dob" required>   
+            </div>          
+
+            <div class="form-row">
+                <div class="form-group">
+                <label>Email Address:<span class="required">*</span></label>
+                <input type="email" name="email" required placeholder="juan@gmail.com">
+            </div>
+                <div class="form-group">
+                <label>Mobile Number:<span class="required">*</span></label>
+                <input type="text" name="mobile" placeholder="+63 683-472-0572" required>
+            </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nationality:<span class="required">*</span></label>
+                <select name="nationality" required>
+                    <option value="" disabled selected hidden>Choose a nationality</option>
+                    <option>Afghan</option>
+                    <option>Albanian</option>
+                    <option>Algerian</option>
+                    <option>American</option>
+                    <option>Andorran</option>
+                    <option>Angolan</option>
+                    <option>Argentinian</option>
+                    <option>Armenian</option>
+                    <option>Australian</option>
+                    <option>Austrian</option>
+                    <option>Azerbaijani</option>
+                    <option>Bahamian</option>
+                    <option>Bahraini</option>
+                    <option>Bangladeshi</option>
+                    <option>Barbadian</option>
+                    <option>Belarusian</option>
+                    <option>Belgian</option>
+                    <option>Belizean</option>
+                    <option>Beninese</option>
+                    <option>Bhutanese</option>
+                    <option>Bolivian</option>
+                    <option>Bosnian</option>
+                    <option>Botswanan</option>
+                    <option>Brazilian</option>
+                    <option>British</option>
+                    <option>Bruneian</option>
+                    <option>Bulgarian</option>
+                    <option>Burkinabe</option>
+                    <option>Burundian</option>
+                    <option>Cambodian</option>
+                    <option>Cameroonian</option>
+                    <option>Canadian</option>
+                    <option>Cape Verdean</option>
+                    <option>Central African</option>
+                    <option>Chadian</option>
+                    <option>Chilean</option>
+                    <option>Chinese</option>
+                    <option>Colombian</option>
+                    <option>Comorian</option>
+                    <option>Congolese</option>
+                    <option>Costa Rican</option>
+                    <option>Croatian</option>
+                    <option>Cuban</option>
+                    <option>Cypriot</option>
+                    <option>Czech</option>
+                    <option>Danish</option>
+                    <option>Djiboutian</option>
+                    <option>Dominican</option>
+                    <option>Dutch</option>
+                    <option>East Timorese</option>
+                    <option>Ecuadorian</option>
+                    <option>Egyptian</option>
+                    <option>Emirati</option>
+                    <option>English</option>
+                    <option>Equatorial Guinean</option>
+                    <option>Eritrean</option>
+                    <option>Estonian</option>
+                    <option>Ethiopian</option>
+                    <option>Fijian</option>
+                    <option>Filipino</option>
+                    <option>Finnish</option>
+                    <option>French</option>
+                    <option>Gabonese</option>
+                    <option>Gambian</option>
+                    <option>Georgian</option>
+                    <option>German</option>
+                    <option>Ghanaian</option>
+                    <option>Greek</option>
+                    <option>Grenadian</option>
+                    <option>Guatemalan</option>
+                    <option>Guinean</option>
+                    <option>Guyanese</option>
+                    <option>Haitian</option>
+                    <option>Honduran</option>
+                    <option>Hungarian</option>
+                    <option>Icelandic</option>
+                    <option>Indian</option>
+                    <option>Indonesian</option>
+                    <option>Iranian</option>
+                    <option>Iraqi</option>
+                    <option>Irish</option>
+                    <option>Israeli</option>
+                    <option>Italian</option>
+                    <option>Ivorian</option>
+                    <option>Jamaican</option>
+                    <option>Japanese</option>
+                    <option>Jordanian</option>
+                    <option>Kazakh</option>
+                    <option>Kenyan</option>
+                    <option>Kuwaiti</option>
+                    <option>Kyrgyz</option>
+                    <option>Laotian</option>
+                    <option>Latvian</option>
+                    <option>Lebanese</option>
+                    <option>Liberian</option>
+                    <option>Libyan</option>
+                    <option>Liechtensteiner</option>
+                    <option>Lithuanian</option>
+                    <option>Luxembourgish</option>
+                    <option>Malagasy</option>
+                    <option>Malawian</option>
+                    <option>Malaysian</option>
+                    <option>Maldivian</option>
+                    <option>Malian</option>
+                    <option>Maltese</option>
+                    <option>Mauritanian</option>
+                    <option>Mauritian</option>
+                    <option>Mexican</option>
+                    <option>Moldovan</option>
+                    <option>Mongolian</option>
+                    <option>Montenegrin</option>
+                    <option>Moroccan</option>
+                    <option>Mozambican</option>
+                    <option>Myanmar</option>
+                    <option>Namibian</option>
+                    <option>Nepalese</option>
+                    <option>New Zealander</option>
+                    <option>Nicaraguan</option>
+                    <option>Nigerien</option>
+                    <option>Nigerian</option>
+                    <option>North Korean</option>
+                    <option>Norwegian</option>
+                    <option>Omani</option>
+                    <option>Pakistani</option>
+                    <option>Panamanian</option>
+                    <option>Papua New Guinean</option>
+                    <option>Paraguayan</option>
+                    <option>Peruvian</option>
+                    <option>Polish</option>
+                    <option>Portuguese</option>
+                    <option>Qatari</option>
+                    <option>Romanian</option>
+                    <option>Russian</option>
+                    <option>Rwandan</option>
+                    <option>Saudi</option>
+                    <option>Scottish</option>
+                    <option>Senegalese</option>
+                    <option>Serbian</option>
+                    <option>Seychellois</option>
+                    <option>Sierra Leonean</option>
+                    <option>Singaporean</option>
+                    <option>Slovak</option>
+                    <option>Slovenian</option>
+                    <option>Somali</option>
+                    <option>South African</option>
+                    <option>South Korean</option>
+                    <option>Spanish</option>
+                    <option>Sri Lankan</option>
+                    <option>Sudanese</option>
+                    <option>Surinamese</option>
+                    <option>Swazi</option>
+                    <option>Swedish</option>
+                    <option>Swiss</option>
+                    <option>Syrian</option>
+                    <option>Taiwanese</option>
+                    <option>Tajik</option>
+                    <option>Tanzanian</option>
+                    <option>Thai</option>
+                    <option>Togolese</option>
+                    <option>Tongan</option>
+                    <option>Trinidadian</option>
+                    <option>Tunisian</option>
+                    <option>Turkish</option>
+                    <option>Turkmen</option>
+                    <option>Ugandan</option>
+                    <option>Ukrainian</option>
+                    <option>Uruguayan</option>
+                    <option>Uzbek</option>
+                    <option>Venezuelan</option>
+                    <option>Vietnamese</option>
+                    <option>Welsh</option>
+                    <option>Yemeni</option>
+                    <option>Zambian</option>
+                    <option>Zimbabwean</option>         
+                    </select>
+                </div>
+            
+                <div class="form-group">
+                    <p style="color: #d67a7c; font-weight: 500;">❗Please write your names based on your PSA/NSO-copy of birth certificate.<br> For married females who wanted to use their married name, write your names based on your marriage certificate.</p>
+                </div>
+            
+            </div>
+        
+            <div class="sidebar">
+                            
+            <div class="alert-container">
+                <div class="alert-content">
+                    <b>REMINDER:</b><br>
+                    Please provide your correct and complete information.<br>
+                    Fields marked with asterisk <strong>(*)</strong> are required.
+                </div>
+            </div>
+                            
+            <div class="data-privacy-container">
+                <div class="privacy-content">
+                    <b>Data Privacy and Data Consent Notice:</b>
+                    <br><br>
+
+                    <label for="privacy-agree">
+                        <input type="checkbox" id="privacy-agree">
+                        By completing and submitting this application, I hereby authorize National University to process my personal data to facilitate my application and reach out to me via phone, email, or other messaging platforms regarding its status. In the event that I no longer wish to be contacted, I will inform National University accordingly.
+                    </label>
+
+                    <label for="consent-agree">
+                        <input type="checkbox" id="consent-agree">
+                        I have read and understood how my personal information will be handled by National University. I hereby authorize the university to collect and process my data for the purposes described above.
+                    </label>
+
+                    <br>
+                    <b>Data Retention:</b>
+                    <p>I understand that I have the right to access, correct, or delete my personal data at any time. I also acknowledge that I can withdraw my consent for data processing by contacting National University through the provided channels.</p>
+
+                    <button id="submit-btn" type="button">Submit Application</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

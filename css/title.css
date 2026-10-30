@@ -1,0 +1,207 @@
+/* =============================================================================
+   title.css — The title screen: logo, subtitle, blinking PRESS START.
+   Total intro length is about 2 seconds. Reduced motion shows the final state.
+   ============================================================================= */
+
+.title {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: clamp(48px, 9dvh, 110px) 20px 24px;
+  text-align: center;
+  animation: title-fade 400ms steps(4, end) backwards;
+}
+
+.title-inner {
+  width: 100%;
+  max-width: 900px;
+}
+
+@keyframes title-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Logo ──────────────────────────────────────────────────── */
+
+.title-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 11.5vw, min(5.25rem, 11dvh));
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.logo-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.logo-letter {
+  display: inline-block;
+  animation: logo-drop 480ms steps(6, end) var(--d, 0s) backwards;
+}
+
+@keyframes logo-drop {
+  0% { transform: translateY(-140%); opacity: 0; }
+  70% { transform: translateY(8%); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.logo-line-1 {
+  color: var(--gold);
+  text-shadow:
+    0 var(--px) 0 var(--gold-dim),
+    0 calc(var(--px) * 2) 0 var(--ink),
+    var(--px) var(--px) 0 var(--ink),
+    calc(var(--px) * -1) var(--px) 0 var(--ink),
+    var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 var(--ink),
+    0 calc(var(--px) * -1) 0 var(--ink),
+    var(--px) calc(var(--px) * -1) 0 var(--ink),
+    calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--ink);
+}
+
+.logo-line-2 {
+  color: var(--teal);
+  text-shadow:
+    0 var(--px) 0 var(--teal-dim),
+    0 calc(var(--px) * 2) 0 var(--ink),
+    var(--px) var(--px) 0 var(--ink),
+    calc(var(--px) * -1) var(--px) 0 var(--ink),
+    var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 var(--ink),
+    0 calc(var(--px) * -1) 0 var(--ink),
+    var(--px) calc(var(--px) * -1) 0 var(--ink),
+    calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--ink);
+}
+
+/* ── Subtitle & tagline ────────────────────────────────────── */
+
+.title-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(18px, 3.5dvh, 36px);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.6875rem, 2.4vw, 1.125rem);
+  letter-spacing: 0.22em;
+  color: var(--cream);
+  text-shadow: var(--px) var(--px) 0 var(--ink);
+  animation: title-fade 300ms steps(3, end) 1.45s backwards;
+}
+
+.title-sub::before,
+.title-sub::after {
+  content: '';
+  width: clamp(16px, 5vw, 48px);
+  height: var(--px);
+  background: var(--gold);
+  box-shadow: 0 var(--px) 0 0 var(--gold-dim);
+}
+
+.title-tag {
+  margin-top: 14px;
+  font-size: clamp(0.9375rem, 2vw, 1.125rem);
+  color: var(--pale);
+  text-shadow: 2px 2px 0 var(--ink);
+  animation: title-fade 300ms steps(3, end) 1.6s backwards;
+}
+
+/* ── PRESS START ───────────────────────────────────────────── */
+
+.press-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(20px, 4dvh, 40px);
+  padding: 16px 20px;
+  min-height: 52px;
+  background: rgba(7, 11, 22, 0.72);
+  border: 0;
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.9rem, 3vw, 1.25rem);
+  letter-spacing: 0.12em;
+  text-shadow: var(--px) var(--px) 0 var(--ink);
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--ink),
+    0 var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 0 var(--ink),
+    var(--px) 0 0 0 var(--ink);
+  animation:
+    title-fade 1ms linear 1.9s both,
+    blink 1.1s steps(1, end) 1.9s infinite;
+}
+
+.press-start .sprite {
+  width: calc(var(--px) * 4);
+  height: calc(var(--px) * 5);
+  flex: none;
+}
+
+.press-start:hover {
+  color: var(--cream);
+}
+
+.press-start:focus-visible {
+  outline-offset: calc(var(--px) * 2);
+  animation: title-fade 1ms linear 1.9s both;
+}
+
+.title.is-starting .press-start {
+  animation: none;
+  color: var(--cream);
+}
+
+.title-hint {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-shadow: 2px 2px 0 var(--ink);
+  animation: title-fade 300ms steps(3, end) 2s backwards;
+}
+
+.title-foot {
+  margin-top: auto;
+  padding-top: 24px;
+  font-family: var(--font-pixel);
+  font-size: calc(9px * var(--type-scale));
+  letter-spacing: 0.1em;
+  line-height: 1.8;
+  color: var(--cream);
+  text-shadow: 2px 2px 0 var(--ink);
+  position: relative;
+  z-index: 2;
+}
+
+/* Keep the title block above the ground/terminal on short landscape screens. */
+@media (max-height: 520px) {
+  .title {
+    padding-top: 56px;
+  }
+
+  .title-logo {
+    flex-direction: row;
+    gap: 0.5em;
+    font-size: clamp(1.75rem, 8vw, 3.5rem);
+  }
+
+  .press-start {
+    margin-top: 16px;
+  }
+
+  .title-tag,
+  .title-hint {
+    display: none;
+  }
+}

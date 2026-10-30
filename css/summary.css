@@ -1,0 +1,181 @@
+/* =============================================================================
+   summary.css — "Skip the game" recruiter summary (#/summary) + print sheet.
+   A plain paper-style page: readable first, game second. No animation.
+   ============================================================================= */
+
+.summary-screen {
+  max-width: 920px;
+  animation: none;
+}
+
+.sum-sheet {
+  --paper: #f7f2e4;
+  --paper-ink: #1b2236;
+  --paper-muted: #4a5470;
+  --paper-rule: #cfc6ab;
+  --paper-link: #0f5f55;
+  padding: clamp(20px, 4vw, 44px);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--ink),
+    0 var(--px) 0 0 var(--ink),
+    calc(var(--px) * -1) 0 0 0 var(--ink),
+    var(--px) 0 0 0 var(--ink),
+    0 calc(var(--px) * 2) 0 calc(var(--px) * -0) rgba(0, 0, 0, 0.35);
+}
+
+.sum-sheet a { color: var(--paper-link); text-underline-offset: 3px; }
+.sum-sheet a:hover { color: var(--ink); }
+.sum-sheet a:focus-visible { outline: 3px solid var(--paper-link); outline-offset: 2px; }
+
+.sum-name {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 3.6vw, 1.625rem);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+.sum-name:focus { outline: none; }
+.sum-name:focus-visible { outline: 3px solid var(--paper-link); outline-offset: 4px; }
+
+.sum-role { margin: 10px 0 0; font-weight: 600; font-size: 1.125rem; }
+.sum-meta { margin: 2px 0 0; color: var(--paper-muted); }
+
+.sum-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sum-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 18px calc(var(--px) * -1) 0;
+}
+.sum-actions .btn { color: var(--cream); }
+.sum-actions .btn:hover { color: var(--ink); }
+.sum-actions .btn-ghost { --btn-bg: #2a3a63; --btn-ring: #121b33; }
+.sum-actions .btn-ghost:hover { --btn-bg: var(--teal); color: var(--ink); }
+
+.sum-body { margin-top: 20px; }
+
+.sum-section {
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 2px solid var(--paper-rule);
+}
+
+.sum-h2 {
+  break-after: avoid;
+  margin: 0 0 10px;
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6a4a12;
+}
+
+.sum-section p { margin: 0 0 8px; max-width: 74ch; }
+
+.sum-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+.sum-list-tight { gap: 8px; }
+.sum-list li { break-inside: avoid; }
+.sum-list li > p:last-child { margin-bottom: 0; }
+
+.sum-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 16px;
+}
+.sum-date {
+  font-size: 0.8125rem;
+  color: var(--paper-muted);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.sum-tech, .sum-links { font-size: 0.875rem; color: var(--paper-muted); }
+.sum-links a { color: var(--paper-link); }
+
+.sum-skills { margin: 0; display: grid; gap: 6px; }
+.sum-skills div { display: grid; grid-template-columns: 9.5em 1fr; gap: 12px; }
+.sum-skills dt { font-weight: 600; }
+.sum-skills dd { margin: 0; }
+
+.sum-bullets { margin: 0; padding-left: 1.4em; list-style: disc; }
+
+.sum-foot {
+  margin: 22px 0 0;
+  padding-top: 12px;
+  border-top: 2px solid var(--paper-rule);
+  font-size: 0.8125rem;
+  color: var(--paper-muted);
+}
+
+@media (max-width: 560px) {
+  .sum-skills div { grid-template-columns: 1fr; gap: 0; }
+  .sum-date { white-space: normal; }
+}
+
+/* The scene behind the paper is just dimmed on this screen. */
+[data-scene='summary'] .stage-dim { opacity: 0.55; }
+
+/* ── Title-screen entry link ─────────────────────────────────── */
+.title-skip {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 12px;
+  min-height: 44px;
+  line-height: 28px;
+  font-size: 0.875rem;
+  color: var(--cream);
+  background: rgba(7, 11, 22, 0.62);
+  text-shadow: 2px 2px 0 var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  animation: title-fade 300ms steps(3, end) 2.2s backwards;
+}
+.title-skip:hover { color: var(--gold); }
+@media (max-height: 520px) { .title-skip { margin-top: 4px; } }
+
+/* ── Print: a clean one-to-two page résumé sheet ──────────────── */
+@media print {
+  @page { margin: 14mm; }
+
+  html, body { background: #fff !important; }
+  .stage, .hud, .wipe, .skip-link, #announcer, .sum-actions, .title-skip,
+  .modal-backdrop, .scanlines { display: none !important; }
+  .crt-on::after, .crt-on::before { display: none !important; }
+
+  .screen { min-height: 0; }
+  .summary-screen { max-width: none; padding: 0; }
+  .sum-sheet {
+    padding: 0;
+    box-shadow: none;
+    background: #fff;
+    --paper-ink: #000;
+    --paper-muted: #333;
+    --paper-link: #000;
+    --paper-rule: #999;
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+  .sum-name { font-size: 18pt; }
+  .sum-h2 { color: #000; font-size: 9pt; }
+  .sum-section { margin-top: 12px; padding-top: 10px; }
+  .sum-sheet a { text-decoration: none; }
+  .sum-contact a[href^='http']::after,
+  .sum-links a[href^='http']::after { content: ' (' attr(href) ')'; font-size: 8.5pt; word-break: break-all; }
+  .sum-list li a[href^='https://www.credly.com']::after { content: none; }
+  .sum-foot { display: none; }
+}
